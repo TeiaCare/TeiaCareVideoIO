@@ -20,7 +20,7 @@
 */
 
 #include <iostream>
-#include <video_io/video_reader.hpp>
+#include <teiacare/video_io/video_reader.hpp>
 #include <opencv2/videoio.hpp>
 #include <benchmark/cppbenchmark.h>
 

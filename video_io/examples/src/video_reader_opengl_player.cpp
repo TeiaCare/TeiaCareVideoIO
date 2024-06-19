@@ -25,7 +25,7 @@
 #include <iostream>
 #include <thread>
 
-#include <video_io/video_reader.hpp>
+#include <teiacare/video_io/video_reader.hpp>
 #include "utils/simple_frame.hpp"
 
 #include <GLFW/glfw3.h>

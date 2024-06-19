@@ -24,7 +24,7 @@
 #include <iostream>
 #include <thread>
 
-#include <video_io/video_reader.hpp>
+#include <teiacare/video_io/video_reader.hpp>
 #include "utils/simple_frame.hpp"
 #include "utils/frame_queue.hpp"
 

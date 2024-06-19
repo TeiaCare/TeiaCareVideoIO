@@ -22,7 +22,7 @@
 */
 
 #include <iostream>
-#include <video_io/video_reader.hpp>
+#include <teiacare/video_io/video_reader.hpp>
 
 void log_callback(const std::string& str) { std::cout << "[::video_reader::] " << str << std::endl; }
 
