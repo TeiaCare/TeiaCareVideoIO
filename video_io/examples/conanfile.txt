@@ -1,0 +1,16 @@
+[requires]
+imgui/1.90-docking
+glfw/3.3.8
+spdlog/1.13.0
+
+[generators]
+CMakeDeps
+
+[options]
+
+[imports]
+./res/bindings, imgui_impl_glfw.h -> ../imgui_bindings
+./res/bindings, imgui_impl_glfw.cpp -> ../imgui_bindings
+./res/bindings, imgui_impl_opengl3.h -> ../imgui_bindings
+./res/bindings, imgui_impl_opengl3.cpp -> ../imgui_bindings
+./res/bindings, imgui_impl_opengl3_loader.h  -> ../imgui_bindings
