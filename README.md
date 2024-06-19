@@ -178,11 +178,10 @@ In order to push a Conan package to TeiaCare artifactory server it is required t
 
 ```bash
 # export CONAN_REVISIONS_ENABLED=1
-conan remote add artifactory http://<ADDRESS>:<PORT>/artifactory/api/conan/conan
-conan user -p <ARTIFACTORY_PERSONAL_ACCESS_TOKEN> -r artifactory <YOUR_USERNAME>
-
-python3 scripts/conan/create.py <Debug|Release|RelWithDebInfo>  <COMPILER_NAME> <COMPILER_VERSION>
-python scripts/conan/upload.py artifactory teiacare_video_io
+conan remote add teiacare_video_io $(artifactory.url)/teiacare_video_io
+conan user $(artifactory.username) -p $(artifactory.password) -r teiacare_video_io
+python scripts/conan/create.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION>
+python scripts/conan/upload.py teiacare_video_io teiacare_video_io/<PACKAGE_VERSION>@
 ```
 
 

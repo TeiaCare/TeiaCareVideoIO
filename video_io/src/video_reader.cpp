@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <video_io/video_reader.hpp>
+#include <teiacare/video_io/video_reader.hpp>
 #include "logger.hpp"
 #include "video_reader_hw.hpp"
 

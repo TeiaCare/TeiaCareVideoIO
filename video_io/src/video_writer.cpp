@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <video_io/video_writer.hpp>
+#include <teiacare/video_io/video_writer.hpp>
 #include "logger.hpp"
 
 extern "C"
