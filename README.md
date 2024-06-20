@@ -3,6 +3,8 @@ Welcome to TeiaCareVideoIO!
 
 *TeiaCareVideoIO* is a C++ video encoder and decoder library.
 
+![TeiaCareVideoIO](https://socialify.git.ci/TeiaCare/TeiaCareVideoIo/image?description=1&font=Raleway&name=1&pattern=Solid&theme=Auto)
+
 ---
 
 ## Getting Started
