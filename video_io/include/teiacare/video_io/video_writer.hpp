@@ -14,15 +14,15 @@
 
 #pragma once
 
-#include <string>
+#include <chrono>
 #include <functional>
 #include <memory>
-#include <optional>
-#include <chrono>
 #include <mutex>
+#include <optional>
+#include <string>
 
 struct AVFormatContext;
-struct AVCodecContext; 
+struct AVCodecContext;
 struct AVCodec;
 struct AVPacket;
 struct AVFrame;
@@ -38,9 +38,9 @@ class video_writer
 public:
     explicit video_writer() noexcept;
     ~video_writer() noexcept;
-    
+
     // using log_callback_t = std::function<void(const std::string&)>;
-    // void set_log_callback(const log_callback_t& cb, const log_level& level = log_level::all);    
+    // void set_log_callback(const log_callback_t& cb, const log_level& level = log_level::all);
 
     bool open(const std::string& video_path, int width, int height, const int fps);
     bool open(const std::string& video_path, int width, int height, const int fps, const int duration);
@@ -48,7 +48,7 @@ public:
     bool write(const uint8_t* data);
     bool release();
     bool save();
-    
+
     bool check(const std::string& video_path);
 
 protected:
@@ -73,7 +73,6 @@ private:
     AVStream* _stream;
     int64_t _stream_duration;
     int64_t _next_pts;
-    
 };
 
 }

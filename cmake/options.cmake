@@ -17,7 +17,7 @@ cmake_print_variables(TC_ENABLE_BENCHMARKS)
 option(TC_ENABLE_EXAMPLES "Enable Examples" True)
 cmake_print_variables(TC_ENABLE_EXAMPLES)
 
-option(TC_ENABLE_DOCS "Enable Doxygen docuentation" True)
+option(TC_ENABLE_DOCS "Enable Doxygen docuentation" False)
 cmake_print_variables(TC_ENABLE_DOCS)
 
 option(TC_ENABLE_WARNINGS_ERROR "Enable treat Warnings as Errors" True)
@@ -26,16 +26,16 @@ cmake_print_variables(TC_ENABLE_WARNINGS_ERROR)
 option(TC_ENABLE_SANITIZER_ADDRESS "Enable Address and Leak Sanitizers" False)
 cmake_print_variables(TC_ENABLE_SANITIZER_ADDRESS)
 
-option(TC_ENABLE_SANITIZER_THREAD "Enable Thread Sanitizer" True)
+option(TC_ENABLE_SANITIZER_THREAD "Enable Thread Sanitizer" False)
 cmake_print_variables(TC_ENABLE_SANITIZER_THREAD)
 
-option(TC_ENABLE_CLANG_FORMAT "Enable Clang Format" True)
+option(TC_ENABLE_CLANG_FORMAT "Enable Clang Format" False)
 cmake_print_variables(TC_ENABLE_CLANG_FORMAT)
 
-option(TC_ENABLE_CLANG_TIDY "Enable Clang Tidy" True)
+option(TC_ENABLE_CLANG_TIDY "Enable Clang Tidy" False)
 cmake_print_variables(TC_ENABLE_CLANG_TIDY)
 
-option(TC_ENABLE_CPPCHECK "Enable Cppcheck" True)
+option(TC_ENABLE_CPPCHECK "Enable Cppcheck" False)
 cmake_print_variables(TC_ENABLE_CPPCHECK)
 
 option(TC_ENABLE_CPPLINT "Enable Cpplint" False)

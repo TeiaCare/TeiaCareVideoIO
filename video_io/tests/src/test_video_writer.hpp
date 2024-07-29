@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once 
+#pragma once
 
-#include <gtest/gtest.h>
 #include <teiacare/video_io/video_writer.hpp>
 
-#include <array>
 #include <algorithm>
+#include <array>
 #include <filesystem>
+#include <gtest/gtest.h>
 
 namespace tc::vio::test
 {
@@ -27,29 +27,36 @@ namespace tc::vio::test
 class video_writer_test : public ::testing::TestWithParam<std::string>
 {
 public:
-    static void SetUpTestSuite() 
+    static void SetUpTestSuite()
     {
     }
 
-    static void TearDownTestSuite() 
+    static void TearDownTestSuite()
     {
     }
 
 protected:
     explicit video_writer_test()
-    : v{ std::make_unique<vio::video_writer>() }
-    , test_name { testing::UnitTest::GetInstance()->current_test_info()->name() }
-    , default_output_directory{ std::filesystem::current_path() / "temp" }
-    , default_video_extension { ".mp4" }
-    , default_video_path { (default_output_directory / test_name).replace_extension(default_video_extension) }
-    {         
+        : v{std::make_unique<vio::video_writer>()}
+        , test_name{testing::UnitTest::GetInstance()->current_test_info()->name()}
+        , default_output_directory{std::filesystem::current_path() / "temp"}
+        , default_video_extension{".mp4"}
+        , default_video_path{(default_output_directory / test_name).replace_extension(default_video_extension)}
+    {
         frame_data.fill(static_cast<uint8_t>(0));
     }
 
-    virtual ~video_writer_test() { v->release(); }
+    virtual ~video_writer_test()
+    {
+        v->release();
+    }
 
-    virtual void SetUp() override { }
-    virtual void TearDown() override { }
+    virtual void SetUp() override
+    {
+    }
+    virtual void TearDown() override
+    {
+    }
 
     std::unique_ptr<vio::video_writer> v;
     const std::string test_name;
@@ -59,11 +66,11 @@ protected:
 
     static const int fps = 30;
     static const int width = 640;
-	static const int height = 480;
-	static const int duration = 2;
+    static const int height = 480;
+    static const int duration = 2;
 
     static const int frame_size = width * height * 3;
-    std::array<uint8_t, frame_size> frame_data = { };
+    std::array<uint8_t, frame_size> frame_data = {};
 
     // Standard Definition (SD): 640 x 480
     // High Definition (HD): 1280 x 720
@@ -71,10 +78,10 @@ protected:
     // 4K/Ultra HD (UHD): 3840 x 2160
 
 private:
-    template<typename... Args>
+    template <typename... Args>
     void log(Args&&... args) const
     {
-        ((std::cout << std::forward<Args>(args) << ' ') , ...) << std::endl;
+        ((std::cout << std::forward<Args>(args) << ' '), ...) << std::endl;
     }
 };
 

@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once 
+#pragma once
 
 #include <gtest/gtest.h>
 
-namespace tc::vio { class raw_frame; }
+namespace tc::vio
+{
+class raw_frame;
+}
 
 namespace tc::vio::test
 {
@@ -24,18 +27,26 @@ namespace tc::vio::test
 class raw_frame_test : public ::testing::Test
 {
 protected:
-    explicit raw_frame_test() { }
-    virtual ~raw_frame_test() { }
-    virtual void SetUp() override { }
-    virtual void TearDown() override { }
+    explicit raw_frame_test()
+    {
+    }
+    virtual ~raw_frame_test()
+    {
+    }
+    virtual void SetUp() override
+    {
+    }
+    virtual void TearDown() override
+    {
+    }
 
     std::unique_ptr<vio::raw_frame> raw_frame;
 
 private:
-    template<typename... Args>
+    template <typename... Args>
     void log(Args&&... args) const
     {
-        ((std::cout << std::forward<Args>(args) << ' ') , ...) << std::endl;
+        ((std::cout << std::forward<Args>(args) << ' '), ...) << std::endl;
     }
 };
 

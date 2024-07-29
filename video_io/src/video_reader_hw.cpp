@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "logger.hpp"
 #include "video_reader_hw.hpp"
+
+#include "logger.hpp"
 
 extern "C"
 {
@@ -39,8 +40,7 @@ video_reader::hw_acceleration::~hw_acceleration()
 
 decode_support video_reader::hw_acceleration::init()
 {
-    auto get_hw_video_device_type = []() -> const char*
-    {
+    auto get_hw_video_device_type = []() -> const char* {
         AVHWDeviceType hw_type = AV_HWDEVICE_TYPE_NONE;
 
         std::vector<AVHWDeviceType> supported_hw_types;
@@ -51,13 +51,13 @@ decode_support video_reader::hw_acceleration::init()
             supported_hw_types.push_back(hw_type);
         }
 
-    #if defined(_WIN32)
+#if defined(_WIN32)
         return "dxva2"; // "d3d11va";
-    #endif
-    #if defined(__linux__)
+#endif
+#if defined(__linux__)
         return "vaapi"; // "vdpau";
-    #endif
-    return "";
+#endif
+        return "";
     };
 
     const char* device_type_str = get_hw_video_device_type();
@@ -68,16 +68,21 @@ decode_support video_reader::hw_acceleration::init()
         return decode_support::SW;
     }
 
-    auto get_hw_pixel_format = [](const AVHWDeviceType type) -> int
-    {
+    auto get_hw_pixel_format = [](const AVHWDeviceType type) -> int {
         switch (type)
         {
-            case AV_HWDEVICE_TYPE_VAAPI:        return AV_PIX_FMT_VAAPI;
-            case AV_HWDEVICE_TYPE_DXVA2:        return AV_PIX_FMT_DXVA2_VLD;
-            case AV_HWDEVICE_TYPE_D3D11VA:      return AV_PIX_FMT_D3D11;
-            case AV_HWDEVICE_TYPE_VDPAU:        return AV_PIX_FMT_VDPAU;
-            case AV_HWDEVICE_TYPE_VIDEOTOOLBOX: return AV_PIX_FMT_VIDEOTOOLBOX;
-            default:                            return AV_PIX_FMT_NONE;
+        case AV_HWDEVICE_TYPE_VAAPI:
+            return AV_PIX_FMT_VAAPI;
+        case AV_HWDEVICE_TYPE_DXVA2:
+            return AV_PIX_FMT_DXVA2_VLD;
+        case AV_HWDEVICE_TYPE_D3D11VA:
+            return AV_PIX_FMT_D3D11;
+        case AV_HWDEVICE_TYPE_VDPAU:
+            return AV_PIX_FMT_VDPAU;
+        case AV_HWDEVICE_TYPE_VIDEOTOOLBOX:
+            return AV_PIX_FMT_VIDEOTOOLBOX;
+        default:
+            return AV_PIX_FMT_NONE;
         }
     };
 
@@ -104,13 +109,13 @@ decode_support video_reader::hw_acceleration::init()
 AVBufferRef* video_reader::hw_acceleration::get_frames_ctx(int w, int h)
 {
     hw_frames_ctx = av_hwframe_ctx_alloc(hw_device_ctx);
-    AVHWFramesContext *frames_ctx = (AVHWFramesContext *)(hw_frames_ctx->data);
+    AVHWFramesContext* frames_ctx = (AVHWFramesContext*)(hw_frames_ctx->data);
     frames_ctx->width = w;
     frames_ctx->height = h;
     frames_ctx->format = (AVPixelFormat)hw_pixel_format;
     frames_ctx->sw_format = AV_PIX_FMT_NV12;
     frames_ctx->initial_pool_size = 32;
-    if(av_hwframe_ctx_init(hw_frames_ctx) < 0)
+    if (av_hwframe_ctx_init(hw_frames_ctx) < 0)
     {
         log_error("Error initilizing HW frame context");
     }
@@ -120,10 +125,10 @@ AVBufferRef* video_reader::hw_acceleration::get_frames_ctx(int w, int h)
 
 void video_reader::hw_acceleration::release()
 {
-    if(hw_frames_ctx)
+    if (hw_frames_ctx)
         av_buffer_unref(&hw_frames_ctx);
 
-    if(hw_device_ctx)
+    if (hw_device_ctx)
         av_buffer_unref(&hw_device_ctx);
 
     reset();

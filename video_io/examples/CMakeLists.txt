@@ -5,9 +5,9 @@ function(add_example EXAMPLE_NAME)
     install(TARGETS ${EXAMPLE_NAME} DESTINATION examples)
 endfunction()
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data/ 
-    DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data
-)
+# file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data/ 
+#     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data
+# )
 
 find_package(imgui CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)

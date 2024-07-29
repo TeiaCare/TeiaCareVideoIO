@@ -13,7 +13,9 @@
 // limitations under the License.
 
 #include "test_video_writer.hpp"
-#include "video_io/video_writer.hpp"
+
+#include <teiacare/video_io/video_writer.hpp>
+
 #include <filesystem>
 #include <thread>
 
@@ -54,7 +56,7 @@ TEST_F(video_writer_test, open_invalid_extension_default_to_mpeg)
 {
     const auto invalid_video_path = (default_output_directory / test_name).replace_extension("invalid-extension");
     ASSERT_TRUE(v->open(invalid_video_path, width, height, fps));
-    
+
     ASSERT_TRUE(v->write(frame_data.data()));
     ASSERT_TRUE(v->save());
 
@@ -136,7 +138,7 @@ TEST_F(video_writer_test, save_without_open)
 {
     ASSERT_FALSE(v->is_opened());
     ASSERT_FALSE(v->save());
-    
+
     ASSERT_FALSE(v->is_opened());
     ASSERT_FALSE(v->release());
 }
@@ -159,7 +161,7 @@ TEST_F(video_writer_test, open_same_path_three_times)
 
 TEST_F(video_writer_test, open_non_existing_path)
 {
-    const auto video_path = (default_output_directory / "not_existing" / test_name ).replace_extension(default_video_extension);
+    const auto video_path = (default_output_directory / "not_existing" / test_name).replace_extension(default_video_extension);
     ASSERT_FALSE(v->open(video_path, width, height, fps));
     ASSERT_FALSE(v->is_opened());
 }
@@ -183,7 +185,7 @@ TEST_P(video_writer_test, write_n_frames)
     const std::string video_extension = GetParam();
     const auto video_path = (default_output_directory / test_name).replace_extension(video_extension);
 
-    if(!std::filesystem::exists(video_path.parent_path()))
+    if (!std::filesystem::exists(video_path.parent_path()))
     {
         std::filesystem::create_directories(video_path.parent_path());
     }
@@ -193,7 +195,7 @@ TEST_P(video_writer_test, write_n_frames)
 
     int num_written_frames = 0;
     const int num_frames_to_write = 300;
-    while(num_written_frames < num_frames_to_write)
+    while (num_written_frames < num_frames_to_write)
     {
         ASSERT_TRUE(v->write(frame_data.data()));
         num_written_frames++;
@@ -212,7 +214,7 @@ TEST_P(video_writer_test, write_n_seconds)
     const std::string video_extension = GetParam();
     const auto video_path = (default_output_directory / test_name).replace_extension(video_extension);
 
-    if(!std::filesystem::exists(video_path.parent_path()))
+    if (!std::filesystem::exists(video_path.parent_path()))
     {
         std::filesystem::create_directories(video_path.parent_path());
     }
@@ -222,9 +224,9 @@ TEST_P(video_writer_test, write_n_seconds)
     ASSERT_TRUE(v->is_opened());
 
     int num_written_frames = 0;
-    while(true)
+    while (true)
     {
-        if(!v->write(frame_data.data()))
+        if (!v->write(frame_data.data()))
             break;
 
         num_written_frames++;
@@ -246,9 +248,8 @@ TEST_P(video_writer_test, write_parallel)
     std::array<std::thread, parallel_count> threads;
     std::array<std::shared_ptr<video_writer>, parallel_count> writers;
 
-    auto writer_callback = [this](const std::shared_ptr<video_writer>& writer, const std::filesystem::path& video_path)
-    {
-        if(!std::filesystem::exists(video_path.parent_path()))
+    auto writer_callback = [this](const std::shared_ptr<video_writer>& writer, const std::filesystem::path& video_path) {
+        if (!std::filesystem::exists(video_path.parent_path()))
         {
             std::filesystem::create_directories(video_path.parent_path());
         }
@@ -258,7 +259,7 @@ TEST_P(video_writer_test, write_parallel)
 
         int num_written_frames = 0;
         const int num_frames_to_write = 300;
-        while(num_written_frames < num_frames_to_write)
+        while (num_written_frames < num_frames_to_write)
         {
             ASSERT_TRUE(writer->write(frame_data.data()));
             num_written_frames++;
@@ -290,7 +291,7 @@ TEST_P(video_writer_test, write_parallel)
 
 INSTANTIATE_TEST_SUITE_P(multi_format, video_writer_test, ::testing::Values(".mp4", ".mpeg", ".avi"));
 
-/* 
+/*
 TODO:
 - N parallel writers
 - always cleanup generated files (use TearDown?)

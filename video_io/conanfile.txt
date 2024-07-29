@@ -1,5 +1,5 @@
 [requires]
-ffmpeg/5.1
+ffmpeg/6.1.1
 
 [generators]
 CMakeDeps
@@ -59,3 +59,6 @@ ffmpeg:with_vdpau=False
 ffmpeg:with_vulkan=False
 ffmpeg:with_xcb=False
 ffmpeg:with_programs=True
+ffmpeg:with_libsvtav1=False
+ffmpeg:with_libaom=False
+ffmpeg:with_libdav1d=False

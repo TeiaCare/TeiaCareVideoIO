@@ -12,18 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * banchmark: 	video_reader_opencv
- * author:		Stefano Lusardi
- * date:		Aug 2022
- * description:	Comparison between OpenCV::VideoCapture and video_io::video_reader. 
-*/
-
-#include <iostream>
 #include <teiacare/video_io/video_reader.hpp>
-#include <opencv2/videoio.hpp>
-#include <benchmark/cppbenchmark.h>
 
+#include <benchmark/cppbenchmark.h>
+#include <iostream>
+#include <opencv2/videoio.hpp>
 
 const auto video_path = "../../../../tests/data/v.mp4";
 // const auto video_path = "../../../../tests/data/testsrc_30sec_30fps.mkv";
@@ -35,36 +28,36 @@ public:
 
 protected:
     cv::VideoCapture v;
-	cv::Mat frame;
+    cv::Mat frame;
 
     void Initialize(CppBenchmark::Context& context) override
-	{
-		if(!v.open(video_path))
-		{
-			std::cout << "Unable to open " << video_path << std::endl;
-			context.Cancel();
-			return;
-		}
+    {
+        if (!v.open(video_path))
+        {
+            std::cout << "Unable to open " << video_path << std::endl;
+            context.Cancel();
+            return;
+        }
 
-		if(!v.isOpened())
-		{
-			std::cout << "cv::VideoCapture is not opened" << std::endl;
-			context.Cancel();
-			return;
-		}
-	}
+        if (!v.isOpened())
+        {
+            std::cout << "cv::VideoCapture is not opened" << std::endl;
+            context.Cancel();
+            return;
+        }
+    }
 
-    void Cleanup(CppBenchmark::Context& context) override 
-	{ 
-		v.release();
-	}
+    void Cleanup(CppBenchmark::Context& context) override
+    {
+        v.release();
+    }
 
-	void Run(CppBenchmark::Context& context) override
-	{	
-		while(v.read(frame))
-		{
-		}
-	}
+    void Run(CppBenchmark::Context& context) override
+    {
+        while (v.read(frame))
+        {
+        }
+    }
 };
 
 class VideoReaderFixture_video_io : public CppBenchmark::Benchmark
@@ -73,40 +66,40 @@ public:
     using Benchmark::Benchmark;
 
 protected:
-	vio::video_reader v;
-	uint8_t* frame = {};
+    vio::video_reader v;
+    uint8_t* frame = {};
 
     void Initialize(CppBenchmark::Context& context) override
-	{
-		int param = context.x();
-		const vio::decode_support decode_support = static_cast<vio::decode_support>(param);
-		
-		if(!v.open(video_path, decode_support))
-		{
-			std::cout << "Unable to open " << video_path << std::endl;
-			context.Cancel();
-			return;
-		}
+    {
+        int param = context.x();
+        const vio::decode_support decode_support = static_cast<vio::decode_support>(param);
 
-		if(!v.is_opened())
-		{
-			std::cout << "vio::video_reader is not opened" << std::endl;
-			context.Cancel();
-			return;
-		}
-	}
+        if (!v.open(video_path, decode_support))
+        {
+            std::cout << "Unable to open " << video_path << std::endl;
+            context.Cancel();
+            return;
+        }
 
-    void Cleanup(CppBenchmark::Context& context) override 
-	{ 
-		v.release();
-	}
+        if (!v.is_opened())
+        {
+            std::cout << "vio::video_reader is not opened" << std::endl;
+            context.Cancel();
+            return;
+        }
+    }
 
-	void Run(CppBenchmark::Context& context) override
-	{	
-		while(v.read(&frame))
-		{
-		}
-	}
+    void Cleanup(CppBenchmark::Context& context) override
+    {
+        v.release();
+    }
+
+    void Run(CppBenchmark::Context& context) override
+    {
+        while (v.read(&frame))
+        {
+        }
+    }
 };
 
 const auto attempts = 1;
@@ -117,11 +110,11 @@ const auto operations = 1;
 // 	Settings().Attempts(attempts).Operations(operations))
 
 BENCHMARK_CLASS(VideoReaderFixture_video_io,
-	"VideoCaptureFixture.video_io.SW",
-	Settings().Attempts(attempts).Operations(operations).Param(static_cast<int>(vio::decode_support::SW)))
+                "VideoCaptureFixture.video_io.SW",
+                Settings().Attempts(attempts).Operations(operations).Param(static_cast<int>(vio::decode_support::SW)))
 
 BENCHMARK_CLASS(VideoReaderFixture_video_io,
-	"VideoCaptureFixture.video_io.HW",
-	Settings().Attempts(attempts).Operations(operations).Param(static_cast<int>(vio::decode_support::HW)))
-	
+                "VideoCaptureFixture.video_io.HW",
+                Settings().Attempts(attempts).Operations(operations).Param(static_cast<int>(vio::decode_support::HW)))
+
 BENCHMARK_MAIN()

@@ -32,12 +32,12 @@ int main(int argc, char** argv)
 	tc::vio::video_reader v;
 	// v.set_log_callback(log_callback, vio::log_level::all);
 
-	const char* video_path = "video.mkv";
+	// const char* video_path = "data/testsrc2_3sec_30fps_640x480.mkv";
+	const char* video_path = "data/output.mp4";
 	if (argc > 1)
 		video_path = argv[1];
 
-	// Open video (local file, RTSP, ...)
-	// const auto video_path = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_175k.mov";
+	// Open video (local file or RTSP stream)
 	if(!v.open(video_path))//, vio::decode_support::HW);
 	{
 		std::cout << "Unable to open input video: " << video_path << std::endl;

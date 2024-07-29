@@ -24,6 +24,7 @@ set(TARGET_SOURCES
 
 target_compile_features(${TARGET_NAME} PUBLIC cxx_std_20)
 target_sources(${TARGET_NAME} PUBLIC ${TARGET_HEADERS} PRIVATE ${TARGET_SOURCES})
+target_link_libraries(${TARGET_NAME} PRIVATE "-lssl -lcrypto")
 target_link_libraries(${TARGET_NAME} 
     PRIVATE 
         ffmpeg::avformat 

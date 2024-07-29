@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "test_video_reader.hpp"
+
 #include <gtest/gtest.h>
 
 namespace tc::vio::test
@@ -106,7 +107,7 @@ TEST_P(video_reader_test, read_n_frames)
 
     int num_decoded_frames = 0;
     const int num_frames_to_read = 300;
-    while(num_decoded_frames < num_frames_to_read)
+    while (num_decoded_frames < num_frames_to_read)
     {
         uint8_t* data_buffer = frame_data.data();
         ASSERT_TRUE(v->read(&data_buffer));

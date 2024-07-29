@@ -16,139 +16,153 @@
  * example: 	video_player_imgui
  * author:		Stefano Lusardi
  * date:		Jun 2022
- * description:	Example to show how to integrate vio::video_reader in a simple video player based on OpenGL (using GLFW). 
+ * description:	Example to show how to integrate vio::video_reader in a simple video player based on OpenGL (using GLFW).
  * 				Single threaded: Main thread decodes and draws subsequent frames.
- * 				Note that this serves only as an example, as in real world application 
+ * 				Note that this serves only as an example, as in real world application
  * 				you might want to handle decoding and rendering on separate threads (see any video_player_xxx_multi_thread).
-*/
-
-#include <iostream>
+ */
 
 #include <teiacare/video_io/video_reader.hpp>
 
-#include <imgui.h>
 #include <GLFW/glfw3.h>
-
+#include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <iostream>
+#include <thread>
+#include <chrono>
 
 using namespace std::chrono_literals;
 
-
-double get_elapsed_time()
+int main(int argc, char** argv)
 {
-	static std::chrono::time_point<std::chrono::steady_clock, std::chrono::duration<double>> start_time = std::chrono::steady_clock::now();
-	std::chrono::duration<double> elapsed_time = std::chrono::steady_clock::now() - start_time;
-	return elapsed_time.count();
-}
+    std::cout << "GLFW version: " << glfwGetVersionString() << std::endl;
+    tc::vio::video_reader v;
 
-int main(int argc, char **argv)
-{
-	std::cout << "GLFW version: " << glfwGetVersionString() << std::endl;
-	tc::vio::video_reader v;
-	
-	const char* video_path = "video.mkv";
-	if (argc > 1)
-		video_path = argv[1];
+    const char* video_path = "data/output_1280x720.mp4";
+    if (argc > 1)
+        video_path = argv[1];
 
-	if (!v.open(video_path)) // , vio::decode_support::SW
-	{
-		std::cout << "Unable to open video: " << video_path << std::endl;
-		return 1;
-	}
+    if (!v.open(video_path)) // , vio::decode_support::SW
+    {
+        std::cout << "Unable to open video: " << video_path << std::endl;
+        return 1;
+    }
 
-	const auto fps = v.get_fps();
-	const auto size = v.get_frame_size();
-	const auto [frame_width, frame_height] = size.value();
+    // const auto fps = v.get_fps();
+    // const auto size = v.get_frame_size();
+    // const auto [frame_width, frame_height] = size.value();
 
-	if (!glfwInit())
-	{
-		std::cout << "Couldn't init GLFW" << std::endl;
-		return 1;
-	}
-	
+    const auto frame_width = 1280;
+    const auto frame_height = 720;
+
+    if (!glfwInit())
+    {
+        std::cout << "Couldn't init GLFW" << std::endl;
+        return 1;
+    }
+
     const char* glsl_version = "#version 330";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-	GLFWwindow *window = glfwCreateWindow(frame_width, frame_height, "Video Player imgui", NULL, NULL);
-	if (!window)
-	{
-		std::cout << "Couldn't open window" << std::endl;
-		return 1;
-	}
+    const auto lateral_panel_width = 300;
 
-	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1); // Enable vsync
+    const auto window_width = 1280;
+    const auto window_height = 720;
+    GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Video Player imgui", NULL, NULL);
+    if (!window)
+    {
+        std::cout << "Couldn't open window" << std::endl;
+        return 1;
+    }
 
-   	int screen_width, screen_height;
-	glfwGetFramebufferSize(window, &screen_width, &screen_height);
-	glViewport(0, 0, screen_width, screen_height);
+    glfwMakeContextCurrent(window);
+    glfwSwapInterval(1); // Enable vsync
+
+    int screen_width, screen_height;
+    glfwGetFramebufferSize(window, &screen_width, &screen_height);
+    glViewport(0, 0, screen_width, screen_height);
+    glfwSetWindowAspectRatio(window, window_width, window_height);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    (void)io;
+    ImGui::StyleColorsDark();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigDockingTransparentPayload = true;
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    ImGui::StyleColorsDark();
-    ImGuiStyle &style = ImGui::GetStyle();
-    style.WindowBorderSize = 0.0f;
-    style.WindowPadding = { 0.0f, 0.0f };
+    GLuint texture_handle;
+    glGenTextures(1, &texture_handle);
+    glBindTexture(GL_TEXTURE_2D, texture_handle);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 1);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glClearColor(0.f, 0.f, 0.f, 0.f);
 
-	GLuint texture_handle;
-	glGenTextures(1, &texture_handle);
-	glBindTexture(GL_TEXTURE_2D, texture_handle);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, 1);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glClearColor(0.f, 0.f, 0.f, 0.f);
+    uint8_t* frame_data = {};
 
     while (!glfwWindowShouldClose(window))
     {
+        glfwPollEvents();
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-		uint8_t* frame_data = {};
-		if (!v.read(&frame_data))
-		{
-			std::cout << "Video finished" << std::endl;
-			break;
-		}
+        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_AutoHideTabBar);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame_width, frame_height, 0, GL_RGB, GL_UNSIGNED_BYTE, frame_data);
+        if (!v.read(&frame_data))
+        {
+            if(v.is_opened())
+            {
+                std::cout << "Video finished" << std::endl;
+                v.release();
+            }
+            
+            // break;
+        }
+        else
+        {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame_width, frame_height, 0, GL_RGB, GL_UNSIGNED_BYTE, frame_data);
+        }
 
-		const ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->Pos);
-		ImGui::SetNextWindowSize(viewport->Size);
+        {
+            ImGui::Begin("Video");
+            ImGui::Image((void*)static_cast<uintptr_t>(texture_handle), ImGui::GetWindowSize());
+            ImGui::End();
+        }
 
-		static ImGuiWindowFlags main_window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus;
+        {
+            ImGui::Begin("Info");
+            ImGui::Text("Window Size: [%d, %d]", static_cast<int>(ImGui::GetMainViewport()->Size.x), static_cast<int>(ImGui::GetMainViewport()->Size.y));
+            ImGui::Text("Rendering: %.1f (FPS)", ImGui::GetIO().Framerate);
+            ImGui::End();
+        }
 
-		ImGui::Begin("MainWindow", nullptr, main_window_flags);
-		ImGui::Image((void*)static_cast<uintptr_t>(texture_handle), viewport->Size);
-		ImGui::End();
-
+        ImGui::ShowDemoWindow();
 
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
         glClear(GL_COLOR_BUFFER_BIT);
-        
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
-        glfwPollEvents();
+
+        // Limit frame rate by sleeping on the current thread...
+        std::this_thread::sleep_for(1s);
     }
-	
-	v.release();
+
+    v.release();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -157,5 +171,5 @@ int main(int argc, char **argv)
     glfwDestroyWindow(window);
     glfwTerminate();
 
-	return 0;
+    return 0;
 }
