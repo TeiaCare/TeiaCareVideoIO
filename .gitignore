@@ -9,6 +9,7 @@
 **/.cache
 **/.conan
 **/.clangd
+**/data
 **/launch.dev.json
 **/compile_commands.json
 **/CMakeUserPresets.json

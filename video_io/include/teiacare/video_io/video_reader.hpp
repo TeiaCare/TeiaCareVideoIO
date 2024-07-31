@@ -66,6 +66,7 @@ protected:
     bool open_input(const char* input, const AVInputFormat* input_format);
     bool decode();
     bool convert(uint8_t** data, double* pts);
+    bool reset_data(uint8_t** data, double* pts) const;
     bool flush();
     bool copy_hw_frame();
 

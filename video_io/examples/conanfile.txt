@@ -1,7 +1,6 @@
 [requires]
 imgui/1.90-docking
 glfw/3.3.8
-spdlog/1.13.0
 
 [generators]
 CMakeDeps

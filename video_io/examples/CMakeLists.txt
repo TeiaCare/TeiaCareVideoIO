@@ -1,25 +1,23 @@
-function(add_example EXAMPLE_NAME)
-    add_executable(${EXAMPLE_NAME} src/${EXAMPLE_NAME}.cpp)
-    target_compile_features(${EXAMPLE_NAME} PUBLIC cxx_std_20)
-    target_link_libraries(${EXAMPLE_NAME} PRIVATE teiacare::video_io)
-    install(TARGETS ${EXAMPLE_NAME} DESTINATION examples)
-endfunction()
+include(examples)
 
-# file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data/ 
-#     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data
-# )
-
-find_package(imgui CONFIG REQUIRED)
-find_package(glfw3 CONFIG REQUIRED)
-
+# Video Decoding example
 add_example(video_reader_simple_decode)
+
+# Video Encoding example
 add_example(video_writer_simple_encode)
 
-# video_reader_opengl_player
+# Video Player (OpenGL)
 add_example(video_reader_opengl_player)
 target_link_libraries(video_reader_opengl_player PRIVATE glfw)
 
-# video_reader_imgui_player
+
+# Video Player with decoding on background thread (OpenGL)
+add_example(video_reader_opengl_player_multi_thread)
+target_link_libraries(video_reader_opengl_player_multi_thread PRIVATE glfw)
+
+# Video Player (Dear ImGui)
+find_package(imgui CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
 set(IMGUI_BINDINGS_DIR ${CMAKE_SOURCE_DIR}/build/imgui_bindings)
 add_executable(video_reader_imgui_player
     src/video_reader_imgui_player.cpp

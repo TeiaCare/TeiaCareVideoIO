@@ -119,7 +119,7 @@ TEST_F(video_writer_test, open_write_save_release)
     ASSERT_TRUE(v->save());
     ASSERT_FALSE(v->is_opened());
 
-    ASSERT_FALSE(v->release());
+    v->release();
     ASSERT_FALSE(v->is_opened());
 
     // assert file exists
@@ -131,7 +131,7 @@ TEST_F(video_writer_test, write_without_open)
     ASSERT_FALSE(v->write(frame_data.data()));
 
     ASSERT_FALSE(v->is_opened());
-    ASSERT_FALSE(v->release());
+    v->release();
 }
 
 TEST_F(video_writer_test, save_without_open)
@@ -140,13 +140,13 @@ TEST_F(video_writer_test, save_without_open)
     ASSERT_FALSE(v->save());
 
     ASSERT_FALSE(v->is_opened());
-    ASSERT_FALSE(v->release());
+    v->release();
 }
 
 TEST_F(video_writer_test, release_without_open)
 {
     ASSERT_FALSE(v->is_opened());
-    ASSERT_FALSE(v->release());
+    v->release();
     ASSERT_FALSE(v->is_opened());
 }
 

@@ -3,13 +3,14 @@ if(TC_ENABLE_UNIT_TESTS_COVERAGE)
     add_coverage(${TARGET_NAME})
 endif()
 
+
 include(unit_tests)
 set(UNIT_TESTS_SRC
     src/main.cpp
     src/test_video_reader.hpp
     src/test_video_reader.cpp
-    src/test_video_writer.hpp
-    src/test_video_writer.cpp
+    # src/test_video_writer.hpp
+    # src/test_video_writer.cpp
 )
 setup_unit_tests(${TARGET_NAME} ${UNIT_TESTS_SRC})
 

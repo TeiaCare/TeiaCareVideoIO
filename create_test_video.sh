@@ -1,1 +1,0 @@
-ffmpeg -f lavfi -i "color=c=black:size=640x480:duration=10:rate=1" -vf "drawtext=fontsize=72:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text='%{n}':start_number=1" output.mp4

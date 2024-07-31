@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     std::cout << "GLFW version: " << glfwGetVersionString() << std::endl;
     tc::vio::video_reader v;
 
-    const char* video_path = "data/output_1280x720.mp4";
+    const char* video_path = "/home/stefanolusardi/TeiaCare/TeiaCareVideoIO/data/video_120sec_30fps_SD.mp4";
     if (argc > 1)
         video_path = argv[1];
 
@@ -49,12 +49,9 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    // const auto fps = v.get_fps();
-    // const auto size = v.get_frame_size();
-    // const auto [frame_width, frame_height] = size.value();
-
-    const auto frame_width = 1280;
-    const auto frame_height = 720;
+    const auto fps = v.get_fps();
+    const auto size = v.get_frame_size();
+    const auto [frame_width, frame_height] = size.value();
 
     if (!glfwInit())
     {
@@ -67,8 +64,6 @@ int main(int argc, char** argv)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
-    const auto lateral_panel_width = 300;
 
     const auto window_width = 1280;
     const auto window_height = 720;
@@ -136,7 +131,7 @@ int main(int argc, char** argv)
 
         {
             ImGui::Begin("Video");
-            ImGui::Image((void*)static_cast<uintptr_t>(texture_handle), ImGui::GetWindowSize());
+            ImGui::Image((void*)static_cast<uintptr_t>(texture_handle), ImVec2(frame_width, frame_height));
             ImGui::End();
         }
 
@@ -159,7 +154,7 @@ int main(int argc, char** argv)
         glfwSwapBuffers(window);
 
         // Limit frame rate by sleeping on the current thread...
-        std::this_thread::sleep_for(1s);
+        std::this_thread::sleep_for(100ms);
     }
 
     v.release();

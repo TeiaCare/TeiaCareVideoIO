@@ -26,15 +26,6 @@ namespace tc::vio::test
 
 class video_writer_test : public ::testing::TestWithParam<std::string>
 {
-public:
-    static void SetUpTestSuite()
-    {
-    }
-
-    static void TearDownTestSuite()
-    {
-    }
-
 protected:
     explicit video_writer_test()
         : v{std::make_unique<vio::video_writer>()}
@@ -72,11 +63,6 @@ protected:
 
     static const int frame_size = width * height * 3;
     std::array<uint8_t, frame_size> frame_data = {};
-
-    // Standard Definition (SD): 640 x 480
-    // High Definition (HD): 1280 x 720
-    // Full HD (FHD): 1920 x 1080
-    // 4K/Ultra HD (UHD): 3840 x 2160
 
 private:
     template <typename... Args>

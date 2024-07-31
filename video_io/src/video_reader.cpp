@@ -269,13 +269,19 @@ bool video_reader::is_opened() const
 bool video_reader::read(uint8_t** data, double* pts)
 {
     if (!is_opened())
-        return false;
+    {
+        return reset_data(data, pts);
+    }
 
     if (!decode())
-        return false;
+    {
+        return reset_data(data, pts);
+    }
 
     if (!convert(data, pts))
-        return false;
+    {
+        return reset_data(data, pts);
+    }
 
     // ++current_frame;
     return true;
@@ -316,8 +322,6 @@ void video_reader::release()
 
     if (_decode_support == decode_support::HW)
         _hw->release();
-
-    return true;
 }
 
 auto video_reader::get_frame_count() const -> std::optional<int>
@@ -449,8 +453,8 @@ bool video_reader::convert(uint8_t** data, double* pts)
     {
         _sws_ctx = sws_getCachedContext(_sws_ctx,
                                         _codec_ctx->width, _codec_ctx->height, (AVPixelFormat)_tmp_frame->format,
-                                        _codec_ctx->width, _codec_ctx->height, AVPixelFormat::AV_PIX_FMT_BGR24,
-                                        SWS_BICUBIC, nullptr, nullptr, nullptr);
+                                        _codec_ctx->width, _codec_ctx->height, AVPixelFormat::AV_PIX_FMT_RGB24,
+                                        SWS_BILINEAR, nullptr, nullptr, nullptr);
 
         if (!_sws_ctx)
         {
@@ -459,8 +463,7 @@ bool video_reader::convert(uint8_t** data, double* pts)
         }
     }
 
-    sws_scale(_sws_ctx, _tmp_frame->data, _tmp_frame->linesize, 0,
-              _codec_ctx->height, _dst_frame->data, _dst_frame->linesize);
+    sws_scale(_sws_ctx, _tmp_frame->data, _tmp_frame->linesize, 0, _codec_ctx->height, _dst_frame->data, _dst_frame->linesize);
 
     *data = _dst_frame->data[0];
 
@@ -471,6 +474,21 @@ bool video_reader::convert(uint8_t** data, double* pts)
     }
 
     return true;
+}
+
+bool video_reader::reset_data(uint8_t** data, double* pts) const
+{
+    if (data)
+    {
+        *data = nullptr;
+    }
+
+    if (pts)
+    {
+        *pts = -1.0;
+    }
+
+    return false;
 }
 
 bool video_reader::flush()
