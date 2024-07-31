@@ -16,62 +16,66 @@
  * example: 	video_reader_simple_decode
  * author:		Stefano Lusardi
  * date:		Jun 2021
- * description:	The simplest example to show video_reader API usage. 
+ * description:	The simplest example to show video_reader API usage.
  * 				Single threaded: main thread is responsible for decode subsequent frames until the video ends.
  * 				In case an rtsp stream is provided the main loop will never return.
-*/
+ */
 
-#include <iostream>
 #include <teiacare/video_io/video_reader.hpp>
 
-void log_callback(const std::string& str) { std::cout << "[::video_reader::] " << str << std::endl; }
+#include <iostream>
+
+void log_callback(const std::string& str)
+{
+    std::cout << "[::video_reader::] " << str << std::endl;
+}
 
 int main(int argc, char** argv)
 {
-	// Create video_reader object and register library callback
-	tc::vio::video_reader v;
-	// v.set_log_callback(log_callback, vio::log_level::all);
+    // Create video_reader object and register library callback
+    tc::vio::video_reader v;
+    // v.set_log_callback(log_callback, vio::log_level::all);
 
-	// const char* video_path = "data/testsrc2_3sec_30fps_640x480.mkv";
-	const char* video_path = "data/output.mp4";
-	if (argc > 1)
-		video_path = argv[1];
+    const char* video_path = "data/testsrc2_3sec_30fps_640x480.mkv";
+    // const char* video_path = "data/output.mp4";
+    if (argc > 1)
+        video_path = argv[1];
 
-	// Open video (local file or RTSP stream)
-	if(!v.open(video_path))//, vio::decode_support::HW);
-	{
-		std::cout << "Unable to open input video: " << video_path << std::endl;
-		return EXIT_FAILURE;
-	}
+    // Open video (local file or RTSP stream)
+    if (!v.open(video_path)) //, vio::decode_support::HW);
+    {
+        std::cout << "Unable to open input video: " << video_path << std::endl;
+        return EXIT_FAILURE;
+    }
 
-	std::cout << "Opened input video: " << video_path << std::endl;
-	
-	// Retrieve video info
-	const auto fps = v.get_fps();
-	const auto size = v.get_frame_size();
-	const auto [width, height] = size.value();
-	std::cout << "FPS: " << fps.value() << "\n"
-		<< "Frame Size: [" << width << ", " << height << "]"
-		<< std::endl;
+    std::cout << "Opened input video: " << video_path << std::endl;
 
-	// Read video frame by frame
-	std::cout << "Start decoding frames" << std::endl;
-	size_t num_decoded_frames = 0;
-	uint8_t* frame_data = {};
-	while(v.read(&frame_data))
-	{
-		++num_decoded_frames;
-		std::cout << "Frame: " << num_decoded_frames << std::endl;
-		// Use frame_data array
-		// ...
-	}
-	
-	std::cout << "Decoded Frames: " << num_decoded_frames << std::endl;
+    // Retrieve video info
+    const auto fps = v.get_fps();
+    const auto size = v.get_frame_size();
+    const auto [width, height] = size.value();
+    std::cout << "FPS: " << fps.value() << "\n"
+              << "Frame Size: [" << width << ", " << height << "]"
+              << std::endl;
 
-	// Release and cleanup video_reader
-	v.release();
+    // Read video frame by frame
+    std::cout << "Start decoding frames" << std::endl;
+    size_t num_decoded_frames = 0;
+    uint8_t* frame_data = {};
+    while (v.read(&frame_data))
+    {
+        ++num_decoded_frames;
+        std::cout << "Frame: " << num_decoded_frames << std::endl;
+        // Use frame_data array
+        // ...
+    }
 
-	return EXIT_SUCCESS;
+    std::cout << "Decoded Frames: " << num_decoded_frames << std::endl;
+
+    // Release and cleanup video_reader
+    v.release();
+
+    return EXIT_SUCCESS;
 }
 
 // -formats            show available formats

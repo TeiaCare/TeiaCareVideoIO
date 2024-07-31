@@ -28,9 +28,9 @@ protected:
     explicit video_reader_test()
         : v{std::make_unique<vio::video_reader>()}
         , test_name{testing::UnitTest::GetInstance()->current_test_info()->name()}
-        , default_input_directory{std::filesystem::current_path() / "../../../tests/data/new"}
+        , default_input_directory{std::filesystem::current_path()}
         , default_video_extension{".mp4"}
-        , default_video_name{"testsrc2_3sec_30fps_640x480"}
+        , default_video_name{"output_1280x720"}
         , default_video_path{(default_input_directory / default_video_name).replace_extension(default_video_extension)}
     {
     }
@@ -43,6 +43,7 @@ protected:
     virtual void SetUp() override
     {
     }
+
     virtual void TearDown() override
     {
     }

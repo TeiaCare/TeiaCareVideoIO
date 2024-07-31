@@ -16,12 +16,12 @@
  * example: 	comparison_opencv_video_io
  * author:		Stefano Lusardi
  * date:		Jun 2021
- * description:	Comparison between OpenCV::VideoCapture and vio::video_reader. 
+ * description:	Comparison between OpenCV::VideoCapture and vio::video_reader.
  * 				Public APIs are very similar, while private ones are simplified quite a lot.
  * 				The frames are using OpenCV::imshow in both examples.
- * 				Note that sleep time between consecutive frames is not accurate here, 
+ * 				Note that sleep time between consecutive frames is not accurate here,
  * 				see any video_player_xxx example for a more accurate playback.
-*/
+ */
 
 #include <teiacare/video_io/video_reader.hpp>
 

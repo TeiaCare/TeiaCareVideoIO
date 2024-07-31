@@ -16,9 +16,9 @@
  * example: 	video_writer_simple_encode
  * author:		Stefano Lusardi
  * date:		Sep 2022
- * description:	The simplest example to show video_writer API usage. 
+ * description:	The simplest example to show video_writer API usage.
  * 				Single threaded: main thread is responsible for encoding subsequent frames for a given duration.
-*/
+ */
 
 #include <teiacare/video_io/video_writer.hpp>
 
@@ -130,8 +130,7 @@ int main(int argc, char** argv)
     std::vector<const char*> formats =
         {
             ".mp4",
-            // ".mpg",
-            // ".avi",
+            ".mkv",
         };
 
     for (auto format : formats)

@@ -34,7 +34,6 @@ extern "C"
 namespace tc::vio
 {
 video_writer::video_writer() noexcept
-    : _is_opened{false}
 {
     init();
     av_log_set_level(0);
@@ -47,18 +46,19 @@ video_writer::~video_writer() noexcept
 
 void video_writer::init()
 {
-    _is_opened = false;
+    log_info("Reset video writer");
+
+    _format_ctx = nullptr;
+    _codec_ctx = nullptr;
+    _sws_ctx = nullptr;
+    _packet = nullptr;
+
+    _frame = nullptr;
+    _tmp_frame = nullptr;
 
     _stream = nullptr;
     _stream_duration = -1;
     _next_pts = 0;
-
-    _codec_ctx = nullptr;
-    _frame = nullptr;
-    _tmp_frame = nullptr;
-    _packet = nullptr;
-    _sws_ctx = nullptr;
-    _format_ctx = nullptr;
 }
 
 bool video_writer::open(const std::string& video_path, int width, int height, const int fps)
@@ -69,7 +69,6 @@ bool video_writer::open(const std::string& video_path, int width, int height, co
         return false;
     }
 
-    std::lock_guard lock(_open_mutex);
     release();
 
     log_info("Opening video path:", video_path, "width:", width, "height:", height, "fps:", fps);
@@ -177,7 +176,6 @@ bool video_writer::open(const std::string& video_path, int width, int height, co
         return false;
     }
 
-    _is_opened = true;
     log_info("Video Writer is opened correctly");
     return true;
 }
@@ -196,7 +194,7 @@ bool video_writer::open(const std::string& video_path, int width, int height, co
 
 bool video_writer::is_opened() const
 {
-    return _is_opened;
+    return _codec_ctx != nullptr && _format_ctx != nullptr;
 }
 
 AVFrame* video_writer::alloc_frame(int pix_fmt, int width, int height)
@@ -270,34 +268,16 @@ bool video_writer::convert(const uint8_t* data)
         return false;
     }
 
-    // /* Y */
-    // for (int y = 0; y < _codec_ctx->height; y++)
-    // {
-    //     for (int x = 0; x < _codec_ctx->width; x++)
-    //     {
-    //         _frame->data[0][y * _frame->linesize[0] + x] = static_cast<uint8_t>(x);
-    //     }
-    // }
-
-    // /* Cb and Cr */
-    // for (int y = 0; y < _codec_ctx->height / 2; y++)
-    // {
-    //     for (int x = 0; x < _codec_ctx->width / 2; x++)
-    //     {
-    //         _frame->data[1][y * _frame->linesize[1] + x] = _next_pts;
-    //         _frame->data[2][y * _frame->linesize[2] + x] = 0;
-    //     }
-    // }
-
     if (_codec_ctx->pix_fmt != AV_PIX_FMT_YUV420P)
     {
         // as we only generate a YUV420P picture, we must convert it to the codec pixel format if needed
         if (!_sws_ctx)
         {
-            _sws_ctx = sws_getContext(
-                _codec_ctx->width, _codec_ctx->height, AVPixelFormat::AV_PIX_FMT_YUV420P,
-                _codec_ctx->width, _codec_ctx->height, _codec_ctx->pix_fmt,
-                SWS_BICUBIC, nullptr, nullptr, nullptr);
+            // _sws_ctx = sws_getContext(
+            _sws_ctx = sws_getCachedContext(_sws_ctx,
+                                            _codec_ctx->width, _codec_ctx->height, AVPixelFormat::AV_PIX_FMT_YUV420P,
+                                            _codec_ctx->width, _codec_ctx->height, _codec_ctx->pix_fmt,
+                                            SWS_BICUBIC, nullptr, nullptr, nullptr);
 
             if (!_sws_ctx)
             {
@@ -312,7 +292,8 @@ bool video_writer::convert(const uint8_t* data)
             return false;
         }
 
-        sws_scale(_sws_ctx, (const uint8_t* const*)_tmp_frame->data, _tmp_frame->linesize, 0, _codec_ctx->height, _frame->data, _frame->linesize);
+        sws_scale(_sws_ctx, _tmp_frame->data, _tmp_frame->linesize, 0,
+                  _codec_ctx->height, _frame->data, _frame->linesize);
     }
     else
     {
@@ -330,7 +311,7 @@ bool video_writer::convert(const uint8_t* data)
 
 bool video_writer::write(const uint8_t* data)
 {
-    if (!_is_opened)
+    if (!is_opened())
         return false;
 
     if (!convert(data))
@@ -344,7 +325,7 @@ bool video_writer::write(const uint8_t* data)
 
 bool video_writer::save()
 {
-    if (!_is_opened)
+    if (!is_opened())
         return false;
 
     encode(nullptr);
@@ -369,9 +350,6 @@ bool video_writer::save()
 
 bool video_writer::release()
 {
-    if (!_is_opened)
-        return false;
-
     log_info("Release video writer");
 
     if (_codec_ctx)

@@ -15,9 +15,7 @@
 #pragma once
 
 #include <chrono>
-#include <functional>
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <string>
 
@@ -31,8 +29,6 @@ struct AVStream;
 
 namespace tc::vio
 {
-struct simple_frame;
-
 class video_writer
 {
 public:
@@ -55,17 +51,13 @@ protected:
     void init();
     bool convert(const uint8_t* data);
     bool encode(AVFrame* frame);
-
     AVFrame* alloc_frame(int pix_fmt, int width, int height);
 
 private:
-    bool _is_opened;
-    std::mutex _open_mutex;
-
     AVFormatContext* _format_ctx;
     AVCodecContext* _codec_ctx;
-    AVPacket* _packet;
     SwsContext* _sws_ctx;
+    AVPacket* _packet;
 
     AVFrame* _frame;
     AVFrame* _tmp_frame;

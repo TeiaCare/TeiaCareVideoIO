@@ -25,12 +25,12 @@
 #include <teiacare/video_io/video_reader.hpp>
 
 #include <GLFW/glfw3.h>
+#include <chrono>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <iostream>
 #include <thread>
-#include <chrono>
 
 using namespace std::chrono_literals;
 
@@ -121,12 +121,12 @@ int main(int argc, char** argv)
 
         if (!v.read(&frame_data))
         {
-            if(v.is_opened())
+            if (v.is_opened())
             {
                 std::cout << "Video finished" << std::endl;
                 v.release();
             }
-            
+
             // break;
         }
         else

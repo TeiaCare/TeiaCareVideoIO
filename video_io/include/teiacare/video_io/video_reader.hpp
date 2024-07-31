@@ -15,9 +15,7 @@
 #pragma once
 
 #include <chrono>
-#include <functional>
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <string>
 
@@ -32,7 +30,6 @@ struct AVInputFormat;
 
 namespace tc::vio
 {
-struct simple_frame;
 enum class decode_support
 {
     none,
@@ -49,14 +46,14 @@ public:
     explicit video_reader() noexcept;
     ~video_reader() noexcept;
 
-    using log_callback_t = std::function<void(const std::string&)>;
+    // using log_callback_t = std::function<void(const std::string&)>;
     // void set_log_callback(const log_callback_t& cb, const log_level& level = log_level::all);
 
     bool open(const char* video_path, decode_support decode_preference = decode_support::none);
     bool open(const char* screen_name, screen_options screen_opt);
     bool is_opened() const;
     bool read(uint8_t** data, double* pts = nullptr);
-    bool release();
+    void release();
 
     auto get_frame_count() const -> std::optional<int>;
     auto get_duration() const -> std::optional<std::chrono::steady_clock::duration>;
@@ -67,26 +64,22 @@ public:
 protected:
     void init();
     bool open_input(const char* input, const AVInputFormat* input_format);
-    [[deprecated]] bool decode_0();
     bool decode();
-    bool flush();
     bool convert(uint8_t** data, double* pts);
+    bool flush();
     bool copy_hw_frame();
 
 private:
-    bool _is_opened;
-    std::mutex _open_mutex;
-    decode_support _decode_support;
-
     AVFormatContext* _format_ctx;
     AVCodecContext* _codec_ctx;
-    AVPacket* _packet;
     SwsContext* _sws_ctx;
+    AVPacket* _packet;
 
     AVFrame* _src_frame;
     AVFrame* _dst_frame;
     AVFrame* _tmp_frame;
 
+    decode_support _decode_support;
     AVDictionary* _options;
     int _stream_index;
 
