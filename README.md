@@ -69,6 +69,10 @@ Examples are installed in $PWD/install/examples.
 
 
 ## Unit Tests and Code Coverage
+Unit tests execution requires video data generation. In order to generate such data it is required to run the following python script:
+```bash
+python3 scripts/tests/generate_test_data.py
+```
 
 Note that code coverage is not available on Windows.
 
