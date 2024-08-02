@@ -402,9 +402,9 @@ auto video_reader::get_fps() const -> std::optional<double>
 
 bool video_reader::decode()
 {
-    int ret = 0;
     while (true)
     {
+        int ret = 0;
         av_packet_unref(_packet);
 
         ret = av_read_frame(_format_ctx, _packet);
