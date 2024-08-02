@@ -199,18 +199,21 @@ jobs:
             additionalCodeCoverageFiles: '$(Build.SourcesDirectory)/VERSION'
             pathToSources: '$(Build.SourcesDirectory)'
 
-        - script: |
-            $(ACTIVATE_VIRTUAL_ENV)
-            $(SETUP_BUILD_ENV)
-            sudo apt-get install valgrind
-            python3 scripts/cmake.py ${{BUILD_TYPE}} $(COMPILER) $(COMPILER_VERSION) --unit_tests
-            python scripts/tools/run_valgrind.py --memcheck install/unit_tests/teiacare_video_io_unit_tests
-          displayName: 'Valgrind'
-          condition: eq(variables['Agent.OS'], 'Linux')
-          timeoutInMinutes: 5
-          continueOnError: True
-          env:
-            CONAN_USER_HOME: $(Build.SourcesDirectory)
+        # This step is disabled since there are issues with Valgrind-3.18 (which is default on Ubuntu 22.04 agents)
+        # I have tested this locally with a manually built Valgrind-3.20 and it works without issues.
+
+        # - script: |
+        #     $(ACTIVATE_VIRTUAL_ENV)
+        #     $(SETUP_BUILD_ENV)
+        #     sudo apt-get install valgrind
+        #     python3 scripts/cmake.py ${{BUILD_TYPE}} $(COMPILER) $(COMPILER_VERSION) --unit_tests
+        #     python scripts/tools/run_valgrind.py --memcheck install/unit_tests/teiacare_video_io_unit_tests
+        #   displayName: 'Valgrind'
+        #   condition: eq(variables['Agent.OS'], 'Linux')
+        #   timeoutInMinutes: 5
+        #   continueOnError: True
+        #   env:
+        #     CONAN_USER_HOME: $(Build.SourcesDirectory)
 
         - script: |
             $(ACTIVATE_VIRTUAL_ENV)
@@ -236,15 +239,17 @@ jobs:
           env:
             CONAN_USER_HOME: $(Build.SourcesDirectory)
 
-        - script: |
-            $(ACTIVATE_VIRTUAL_ENV)
-            $(SETUP_BUILD_ENV)
-            conan config set general.revisions_enabled=0
-            conan remote add teiacare $(artifactory.url)/teiacare
-            conan user $(artifactory.username) -p $(artifactory.password) -r teiacare
-            python3 scripts/conan/create.py ${{BUILD_TYPE}} $(COMPILER) $(COMPILER_VERSION)
-          # python3 scripts/conan/upload.py teiacare teiacare_video_io/0.1.0@
-          displayName: 'Create Conan Package'
-          timeoutInMinutes: 5
-          env:
-            CONAN_USER_HOME: $(Build.SourcesDirectory)
+        # This step is disabled because we need to align all the settings in the conanfile.py (used to build our package) with the conanfile.txt that we use to consume FFmpeg.
+
+        # - script: |
+        #     $(ACTIVATE_VIRTUAL_ENV)
+        #     $(SETUP_BUILD_ENV)
+        #     conan config set general.revisions_enabled=0
+        #     conan remote add teiacare $(artifactory.url)/teiacare
+        #     conan user $(artifactory.username) -p $(artifactory.password) -r teiacare
+        #     python3 scripts/conan/create.py ${{BUILD_TYPE}} $(COMPILER) $(COMPILER_VERSION)
+        #     python3 scripts/conan/upload.py teiacare teiacare_video_io/0.1.0@
+        #   displayName: 'Create Conan Package'
+        #   timeoutInMinutes: 5
+        #   env:
+        #     CONAN_USER_HOME: $(Build.SourcesDirectory)
