@@ -21,7 +21,7 @@
 #include <filesystem>
 #include <gtest/gtest.h>
 
-namespace tc::vio::test
+namespace tc::vio::tests
 {
 
 class video_writer_test : public ::testing::TestWithParam<std::string>

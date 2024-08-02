@@ -1,5 +1,8 @@
 include(examples)
 
+set(VIDEO_IO_VIDEO_DATA_ABS_PATH ${CMAKE_SOURCE_DIR}/data/)
+configure_file(src/utils/video_data_path.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/utils/video_data_path.hpp)
+
 # Video Decoding example
 add_example(video_reader_simple_decode)
 

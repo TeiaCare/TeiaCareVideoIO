@@ -22,9 +22,12 @@
 
 #include <teiacare/video_io/video_writer.hpp>
 
+#include "utils/video_data_path.hpp"
 #include <algorithm>
 #include <array>
+#include <filesystem>
 #include <iostream>
+#include <vector>
 
 // void log_callback(const std::string& str) { std::cout << "[::video_writer::] " << str << std::endl; }
 
@@ -59,7 +62,10 @@ void record_n_frames(const char* format)
     tc::vio::video_writer v;
 
     const int num_frames_to_write = 300;
-    const auto video_path = std::string("out_" + std::to_string(num_frames_to_write) + "_frames" + format);
+
+    const auto video_name = std::string("out_" + std::to_string(num_frames_to_write) + "_frames" + format);
+    std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / video_name;
+    const char* video_path = default_video_path.c_str();
     const auto fps = 30;
     const auto width = 640;
     const auto height = 480;
@@ -96,7 +102,10 @@ void record_n_seconds(const char* format)
     tc::vio::video_writer v;
 
     const int num_seconds_to_write = 10;
-    const auto video_path = std::string("out_" + std::to_string(num_seconds_to_write) + "_seconds" + format);
+
+    const auto video_name = std::string("out_" + std::to_string(num_seconds_to_write) + "_seconds" + format);
+    std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / video_name;
+    const char* video_path = default_video_path.c_str();
     const auto fps = 30;
     const auto width = 640;
     const auto height = 480;
@@ -136,7 +145,7 @@ int main(int argc, char** argv)
     for (auto format : formats)
     {
         record_n_frames(format);
-        record_n_seconds(format);
+        // record_n_seconds(format);
     }
 
     return 0;

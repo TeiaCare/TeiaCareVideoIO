@@ -23,21 +23,18 @@
 
 #include <teiacare/video_io/video_reader.hpp>
 
+#include "utils/video_data_path.hpp"
+#include <filesystem>
 #include <iostream>
-
-void log_callback(const std::string& str)
-{
-    std::cout << "[::video_reader::] " << str << std::endl;
-}
 
 int main(int argc, char** argv)
 {
-    // Create video_reader object and register library callback
+    // Create video_reader object
     tc::vio::video_reader v;
-    // v.set_log_callback(log_callback, vio::log_level::all);
 
-    const char* video_path = "data/testsrc2_3sec_30fps_640x480.mkv";
-    // const char* video_path = "data/output.mp4";
+    // Locate video file to be opened
+    std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / "video_10sec_2fps_HD.mp4";
+    const char* video_path = default_video_path.c_str();
     if (argc > 1)
         video_path = argv[1];
 
@@ -48,9 +45,8 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    std::cout << "Opened input video: " << video_path << std::endl;
-
     // Retrieve video info
+    std::cout << "Opened input video: " << video_path << std::endl;
     const auto fps = v.get_fps();
     const auto size = v.get_frame_size();
     const auto [width, height] = size.value();

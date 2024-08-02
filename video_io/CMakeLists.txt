@@ -5,7 +5,7 @@ add_library(teiacare::video_io ALIAS ${TARGET_NAME})
 find_package(ffmpeg CONFIG REQUIRED)
 
 configure_file(
-    src/version.cpp.in 
+    src/version.cpp.in
     ${CMAKE_CURRENT_SOURCE_DIR}/src/version.cpp
 )
 
@@ -24,13 +24,14 @@ set(TARGET_SOURCES
 
 target_compile_features(${TARGET_NAME} PUBLIC cxx_std_20)
 target_sources(${TARGET_NAME} PUBLIC ${TARGET_HEADERS} PRIVATE ${TARGET_SOURCES})
-target_link_libraries(${TARGET_NAME} PRIVATE "-lssl -lcrypto")
-target_link_libraries(${TARGET_NAME} 
-    PRIVATE 
-        ffmpeg::avformat 
-        ffmpeg::avcodec 
-        ffmpeg::swscale 
+target_link_libraries(${TARGET_NAME}
+    PRIVATE
+        ffmpeg::avformat
+        ffmpeg::avcodec
+        ffmpeg::swscale
         ffmpeg::avutil
+        OpenSSL::SSL
+        OpenSSL::Crypto
 )
 target_include_directories(${TARGET_NAME}
     PUBLIC

@@ -19,7 +19,7 @@
 #include <filesystem>
 #include <thread>
 
-namespace tc::vio::test
+namespace tc::vio::tests
 {
 
 TEST_F(video_writer_test, open_without_duration)

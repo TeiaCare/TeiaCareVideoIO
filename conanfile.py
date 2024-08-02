@@ -38,7 +38,7 @@ class TeiaCareVideoIO(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    requires = "ffmpeg/5.1"
+    requires = "ffmpeg/6.1.1"
     generators = "CMakeDeps"
 
     def config_options(self):
@@ -48,9 +48,9 @@ class TeiaCareVideoIO(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        
+
         # self.options["ffmpeg"].disable_everything=True
-        
+
         self.options["ffmpeg"].with_asm=True
         self.options["ffmpeg"].with_zlib=True
         self.options["ffmpeg"].with_bzip2=True

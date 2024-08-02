@@ -3,6 +3,8 @@ if(TC_ENABLE_UNIT_TESTS_COVERAGE)
     add_coverage(${TARGET_NAME})
 endif()
 
+set(VIDEO_IO_VIDEO_DATA_ABS_PATH ${CMAKE_SOURCE_DIR}/data/)
+configure_file(src/utils/video_data_path.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/utils/video_data_path.hpp)
 
 include(unit_tests)
 set(UNIT_TESTS_SRC

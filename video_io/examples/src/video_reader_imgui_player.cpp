@@ -24,8 +24,11 @@
 
 #include <teiacare/video_io/video_reader.hpp>
 
+#include "utils/simple_frame.hpp"
+#include "utils/video_data_path.hpp"
 #include <GLFW/glfw3.h>
 #include <chrono>
+#include <filesystem>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -39,7 +42,8 @@ int main(int argc, char** argv)
     std::cout << "GLFW version: " << glfwGetVersionString() << std::endl;
     tc::vio::video_reader v;
 
-    const char* video_path = "/home/stefanolusardi/TeiaCare/TeiaCareVideoIO/data/video_120sec_30fps_SD.mp4";
+    std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / "video_10sec_2fps_HD.mp4";
+    const char* video_path = default_video_path.c_str();
     if (argc > 1)
         video_path = argv[1];
 
@@ -122,7 +126,7 @@ int main(int argc, char** argv)
                 v.release();
             }
 
-            // break;
+            break;
         }
         else
         {

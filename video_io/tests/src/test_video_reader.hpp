@@ -16,17 +16,18 @@
 
 #include <teiacare/video_io/video_reader.hpp>
 
+#include "utils/video_data_path.hpp"
 #include <filesystem>
 #include <gtest/gtest.h>
 
-namespace tc::vio::test
+namespace tc::vio::tests
 {
 class video_reader_test : public testing::Test
 {
 protected:
     explicit video_reader_test()
         : v{std::make_unique<vio::video_reader>()}
-        , default_input_directory{std::filesystem::path(VIDEO_IO_UNIT_TESTS_DATA)} // defined in unit_tests.cmake
+        , default_input_directory{std::filesystem::path(tc::vio::tests::utils::video_data_path)}
         , default_video_extension{".mp4"}
         , default_video_name{"video_10sec_4fps_HD"}
         , default_video_path{(default_input_directory / default_video_name).replace_extension(default_video_extension)}

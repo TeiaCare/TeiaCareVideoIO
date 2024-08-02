@@ -16,7 +16,7 @@
 
 #include <gtest/gtest.h>
 
-namespace tc::vio::test
+namespace tc::vio::tests
 {
 
 TEST_F(video_reader_test, open_valid_video_path)
