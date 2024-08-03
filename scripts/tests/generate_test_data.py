@@ -24,6 +24,12 @@ import argparse
 APPLICATION_NAME = "Test data generator"
 
 
+def parse():
+    parser = argparse.ArgumentParser(APPLICATION_NAME, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("--directory", help="Directory where output files will be generated", required=False, default=pathlib.Path("data"))
+    parser.add_argument("--executable", help='Path to the ffmpeg executable', required=False, default='ffmpeg')
+    return parser.parse_args()
+
 def ffmpeg_generate_video_commands(ffmpeg_executable, output_dir, video_formats):
     commands = []
     for format in video_formats:
@@ -47,12 +53,6 @@ def ffmpeg_generate_video_commands(ffmpeg_executable, output_dir, video_formats)
         ])
 
     return commands
-
-def parse():
-    parser = argparse.ArgumentParser(APPLICATION_NAME, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--directory", help="Directory where output files will be generated", required=False, default=pathlib.Path("data"))
-    parser.add_argument("--executable", help='Path to the ffmpeg executable', required=False, default='ffmpeg')
-    return parser.parse_args()
 
 def create_file(cmd):
     print(cmd)
@@ -88,13 +88,14 @@ def main():
 
     check_executable(executable)
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=sys.maxsize) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
         commands = ffmpeg_generate_video_commands(executable, output_dir, video_formats)
         futures = {executor.submit(create_file, cmd): cmd for cmd in commands}
         for future in concurrent.futures.as_completed(futures):
             if future.result() != 0:
                 print(f"Error running {APPLICATION_NAME} - Execution finished")
                 return future.result()
+
     print(f"{APPLICATION_NAME} - Execution finished")
     return 0
 

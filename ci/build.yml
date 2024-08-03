@@ -71,21 +71,21 @@ jobs:
           #   ACTIVATE_VIRTUAL_ENV: 'source .venv/bin/activate'
           #   INSTALL_FFMPEG: 'sudo apt-get install -y ffmpeg'
 
-          # ubuntu2204_gcc12:
-          #   AGENT: 'ubuntu-22.04'
-          #   COMPILER: gcc
-          #   COMPILER_VERSION: 12
-          #   SETUP_BUILD_ENV: 'echo $(COMPILER) $(COMPILER_VERSION)'
-          #   ACTIVATE_VIRTUAL_ENV: 'source .venv/bin/activate'
-          #   INSTALL_FFMPEG: 'sudo apt-get install -y ffmpeg'
+          ubuntu2204_gcc12:
+            AGENT: 'ubuntu-22.04'
+            COMPILER: gcc
+            COMPILER_VERSION: 12
+            SETUP_BUILD_ENV: 'echo $(COMPILER) $(COMPILER_VERSION)'
+            ACTIVATE_VIRTUAL_ENV: 'source .venv/bin/activate'
+            INSTALL_FFMPEG: 'sudo apt-get install -y ffmpeg'
 
-          # ubuntu2204_clang15:
-          #   AGENT: 'ubuntu-22.04'
-          #   COMPILER: clang
-          #   COMPILER_VERSION: 15
-          #   SETUP_BUILD_ENV: 'echo $(COMPILER) $(COMPILER_VERSION)'
-          #   ACTIVATE_VIRTUAL_ENV: 'source .venv/bin/activate'
-          #   INSTALL_FFMPEG: 'sudo apt-get install -y ffmpeg'
+          ubuntu2204_clang15:
+            AGENT: 'ubuntu-22.04'
+            COMPILER: clang
+            COMPILER_VERSION: 15
+            SETUP_BUILD_ENV: 'echo $(COMPILER) $(COMPILER_VERSION)'
+            ACTIVATE_VIRTUAL_ENV: 'source .venv/bin/activate'
+            INSTALL_FFMPEG: 'sudo apt-get install -y ffmpeg'
 
           macos14_clang15:
             AGENT: 'macOS-14'
