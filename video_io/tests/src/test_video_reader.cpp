@@ -14,7 +14,7 @@
 
 #include "test_video_reader.hpp"
 
-#include <gtest/gtest.h>
+#include <thread>
 
 namespace tc::vio::tests
 {
