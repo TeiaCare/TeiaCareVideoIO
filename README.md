@@ -1,15 +1,15 @@
 # TeiaCareVideoIO
+
 Welcome to TeiaCareVideoIO!
 
 *TeiaCareVideoIO* is a C++ video encoder and decoder library.
 
 ![TeiaCareVideoIO](https://socialify.git.ci/TeiaCare/TeiaCareVideoIo/image?description=1&font=Raleway&name=1&pattern=Solid&theme=Auto)
 
----
 
 ## Getting Started
 
-**Create a virtual environment**
+### Create a virtual environment
 
 ```bash
 python -m pip install --upgrade pip
@@ -30,7 +30,7 @@ pip install pre-commit==3.7.1
 pre-commit install
 ```
 
-**Setup Build Environment (Windows Only)**
+### Setup Build Environment (Windows Only)
 
 When building from command line on Windows it is necessary to activate the Visual Studio Developer Command Prompt.
 Depending on the version of Visual Studio compiler and on its install location it is required to run *vcvars64.bat* script the set the development environment properly.
@@ -46,14 +46,14 @@ Examples:
 "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
 ```
 
-**Dependencies Setup**
+### Dependencies Setup
 
 This script must be executed in order to setup the conan packages (note that 3rd party libs are only required for unit tests, examples and benchmarks).
 ```bash
 python scripts/conan/setup.py <Debug|Release|DebWithRelInfo> <COMPILER_NAME> <COMPILER_VERSION>
 ```
 
-**Configure, Build and Install**
+### Configure, Build and Install
 
 This script configures, builds and installs the library.
 ```bash
@@ -69,6 +69,7 @@ Examples are installed in $PWD/install/examples.
 
 
 ## Unit Tests and Code Coverage
+
 Unit tests execution requires video data generation. In order to generate such data it is required to run the following python script:
 ```bash
 python3 scripts/tests/generate_test_data.py
@@ -131,6 +132,7 @@ python scripts/tools/run_cppcheck.py <Debug|Release|RelWithDebInfo>
 ```
 
 - [cpplint](https://github.com/cpplint/cpplint) [TODO: Review]
+
 ```bash
 # TODO: add python script.
 cpplint --counting=detailed  $(find teiacare_video_io* -type f -name "*.hpp" -or -name "*.cpp")
@@ -204,6 +206,7 @@ Copyright © 2024 [TeiaCare](https://teiacare.com/)
 
 
 ## Video Streaming Integration Test (RTSP)
+
 ```bash
 # Start mediamtx proxy stream
 docker run --network=host -e MTX_PROTOCOLS=tcp -p 8554:8554 bluenviron/mediamtx
