@@ -151,40 +151,40 @@ TEST_F(video_reader_test, open_different_paths_read_all_files_in_parallel)
 INSTANTIATE_TEST_SUITE_P(video_reader_MP4,
                          parametrized_video_reader_test,
                          ::testing::Values(
-                             video_reader_params({.name = "video_2sec_2fps_HD", .format = "mp4", .duration = 2, .width = 640, .height = 480, .fps = 2}),
-                             video_reader_params({.name = "video_10sec_1fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 1}),
-                             video_reader_params({.name = "video_10sec_2fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 2}),
-                             video_reader_params({.name = "video_10sec_4fps_4K", .format = "mp4", .duration = 10, .width = 3840, .height = 2160, .fps = 4}),
-                             video_reader_params({.name = "video_10sec_4fps_FHD", .format = "mp4", .duration = 10, .width = 1920, .height = 1080, .fps = 4}),
-                             video_reader_params({.name = "video_10sec_4fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 4}),
-                             video_reader_params({.name = "video_10sec_4fps_SD", .format = "mp4", .duration = 10, .width = 640, .height = 480, .fps = 4}),
-                             video_reader_params({.name = "video_10sec_8fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 8}),
-                             video_reader_params({.name = "video_10sec_16fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 16}),
-                             video_reader_params({.name = "video_10sec_30fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 30})
-                             // video_reader_params({.name="video_120sec_30fps_SD", .format="mp4", .duration=120, .width=640, .height=480, .fps=30})
+                             utils::video_params({.name = "video_2sec_2fps_HD", .format = "mp4", .duration = 2, .width = 640, .height = 480, .fps = 2}),
+                             utils::video_params({.name = "video_10sec_1fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 1}),
+                             utils::video_params({.name = "video_10sec_2fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 2}),
+                             utils::video_params({.name = "video_10sec_4fps_4K", .format = "mp4", .duration = 10, .width = 3840, .height = 2160, .fps = 4}),
+                             utils::video_params({.name = "video_10sec_4fps_FHD", .format = "mp4", .duration = 10, .width = 1920, .height = 1080, .fps = 4}),
+                             utils::video_params({.name = "video_10sec_4fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 4}),
+                             utils::video_params({.name = "video_10sec_4fps_SD", .format = "mp4", .duration = 10, .width = 640, .height = 480, .fps = 4}),
+                             utils::video_params({.name = "video_10sec_8fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 8}),
+                             utils::video_params({.name = "video_10sec_16fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 16}),
+                             utils::video_params({.name = "video_10sec_30fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 30})
+                             // utils::video_params({.name="video_120sec_30fps_SD", .format="mp4", .duration=120, .width=640, .height=480, .fps=30})
                              ),
                          [](auto info) { return info.param.name; });
 
 INSTANTIATE_TEST_SUITE_P(video_reader_MKV,
                          parametrized_video_reader_test,
                          ::testing::Values(
-                             video_reader_params({.name = "video_2sec_2fps_HD", .format = "mkv", .duration = 2, .width = 640, .height = 480, .fps = 2}),
-                             video_reader_params({.name = "video_10sec_1fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 1}),
-                             video_reader_params({.name = "video_10sec_2fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 2}),
-                             video_reader_params({.name = "video_10sec_4fps_4K", .format = "mkv", .duration = 10, .width = 3840, .height = 2160, .fps = 4}),
-                             video_reader_params({.name = "video_10sec_4fps_FHD", .format = "mkv", .duration = 10, .width = 1920, .height = 1080, .fps = 4}),
-                             video_reader_params({.name = "video_10sec_4fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 4}),
-                             video_reader_params({.name = "video_10sec_4fps_SD", .format = "mkv", .duration = 10, .width = 640, .height = 480, .fps = 4}),
-                             video_reader_params({.name = "video_10sec_8fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 8}),
-                             video_reader_params({.name = "video_10sec_16fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 16}),
-                             video_reader_params({.name = "video_10sec_30fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 30})
-                             // video_reader_params({.name="video_120sec_30fps_SD", .format="mkv", .duration=120, .width=640, .height=480, .fps=30})
+                             utils::video_params({.name = "video_2sec_2fps_HD", .format = "mkv", .duration = 2, .width = 640, .height = 480, .fps = 2}),
+                             utils::video_params({.name = "video_10sec_1fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 1}),
+                             utils::video_params({.name = "video_10sec_2fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 2}),
+                             utils::video_params({.name = "video_10sec_4fps_4K", .format = "mkv", .duration = 10, .width = 3840, .height = 2160, .fps = 4}),
+                             utils::video_params({.name = "video_10sec_4fps_FHD", .format = "mkv", .duration = 10, .width = 1920, .height = 1080, .fps = 4}),
+                             utils::video_params({.name = "video_10sec_4fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 4}),
+                             utils::video_params({.name = "video_10sec_4fps_SD", .format = "mkv", .duration = 10, .width = 640, .height = 480, .fps = 4}),
+                             utils::video_params({.name = "video_10sec_8fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 8}),
+                             utils::video_params({.name = "video_10sec_16fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 16}),
+                             utils::video_params({.name = "video_10sec_30fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 30})
+                             // utils::video_params({.name="video_120sec_30fps_SD", .format="mkv", .duration=120, .width=640, .height=480, .fps=30})
                              ),
                          [](auto info) { return info.param.name; });
 
 TEST_P(parametrized_video_reader_test, read)
 {
-    const video_reader_params params = GetParam();
+    const utils::video_params params = GetParam();
     const std::filesystem::path video_path = default_input_directory / (params.name + "." + params.format);
     read_full_video(v, video_path, params.duration, params.fps, params.width, params.height);
 }

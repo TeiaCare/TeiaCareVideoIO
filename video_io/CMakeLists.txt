@@ -10,12 +10,16 @@ configure_file(
 )
 
 set(TARGET_HEADERS
+    include/teiacare/video_io/version.hpp
+    include/teiacare/video_io/video_info.hpp
     include/teiacare/video_io/video_reader.hpp
     include/teiacare/video_io/video_writer.hpp
 )
 
 set(TARGET_SOURCES
     src/logger.hpp
+    src/version.cpp
+    src/video_info.cpp
     src/video_reader_hw.cpp
     src/video_reader_hw.hpp
     src/video_reader.cpp
@@ -88,14 +92,4 @@ endif()
 
 if(TC_ENABLE_EXAMPLES)
     add_subdirectory(examples)
-endif()
-
-if(TC_ENABLE_DOCS)
-    include(doxygen)
-    setup_docs(
-        ${TARGET_NAME}
-        "${TARGET_HEADERS}"
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/teiacare/sdk
-        ${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile
-    )
 endif()

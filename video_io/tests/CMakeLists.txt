@@ -4,15 +4,18 @@ if(TC_ENABLE_UNIT_TESTS_COVERAGE)
 endif()
 
 set(VIDEO_IO_VIDEO_DATA_ABS_PATH ${CMAKE_SOURCE_DIR}/data/)
-configure_file(src/utils/video_data_path.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/utils/video_data_path.hpp)
+configure_file(src/utils/video_data_path.cpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/utils/video_data_path.cpp)
 
 include(unit_tests)
 set(UNIT_TESTS_SRC
     src/main.cpp
+    src/utils/video_data_path.cpp
+    src/utils/video_data_path.hpp
+    src/utils/video_params.hpp
     src/test_video_reader.hpp
     src/test_video_reader.cpp
-    # src/test_video_writer.hpp
-    # src/test_video_writer.cpp
+    #src/test_video_writer.hpp
+    #src/test_video_writer.cpp
 )
 setup_unit_tests(${TARGET_NAME} ${UNIT_TESTS_SRC})
 

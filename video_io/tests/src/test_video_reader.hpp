@@ -17,8 +17,13 @@
 #include <teiacare/video_io/video_reader.hpp>
 
 #include "utils/video_data_path.hpp"
+#include "utils/video_params.hpp"
+#include <array>
 #include <filesystem>
 #include <gtest/gtest.h>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace tc::vio::tests
 {
@@ -122,17 +127,7 @@ void read_full_video(const std::unique_ptr<vio::video_reader>& v, const std::fil
     ASSERT_FALSE(v->is_opened());
 }
 
-struct video_reader_params
-{
-    std::string name;
-    std::string format;
-    size_t duration;
-    size_t width;
-    size_t height;
-    double fps;
-};
-
-class parametrized_video_reader_test : public video_reader_test, public testing::WithParamInterface<video_reader_params>
+class parametrized_video_reader_test : public video_reader_test, public testing::WithParamInterface<utils::video_params>
 {
 };
 

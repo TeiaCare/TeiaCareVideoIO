@@ -14,9 +14,6 @@
 
 #include "test_video_writer.hpp"
 
-#include <teiacare/video_io/video_writer.hpp>
-
-#include <filesystem>
 #include <thread>
 
 namespace tc::vio::tests
@@ -52,15 +49,32 @@ TEST_F(video_writer_test, open_invalid_duration)
     ASSERT_FALSE(v->open(default_video_path, width, height, fps, -123));
 }
 
-TEST_F(video_writer_test, open_invalid_extension_default_to_mpeg)
+TEST_F(video_writer_test, open_invalid_extension_default_to_mp4)
 {
-    const auto invalid_video_path = (default_output_directory / test_name).replace_extension("invalid-extension");
+    const auto invalid_video_path = (default_output_directory / "video").replace_extension("invalid-extension");
     ASSERT_TRUE(v->open(invalid_video_path, width, height, fps));
 
-    ASSERT_TRUE(v->write(frame_data.data()));
+    constexpr const int num_frames_to_write = 20;
+    for (int written_frames = 0; written_frames < num_frames_to_write; ++written_frames)
+    {
+        ASSERT_TRUE(v->write(frame_data.data()));
+    }
+
     ASSERT_TRUE(v->save());
 
-    // verify written file is mpeg format
+    tc::vio::video_metadata expected_metadata =
+        {
+            .id = 0,
+            .width = width,
+            .height = height,
+            .nb_frames = num_frames_to_write,
+            .r_frame_rate = fps,
+            .avg_frame_rate = fps,
+            .duration = num_frames_to_write * fps,
+            .codec_name = "h264"};
+
+    const auto video_metadata = info->get_video_metadata(invalid_video_path);
+    ASSERT_EQ(video_metadata.value(), expected_metadata);
 }
 
 TEST_F(video_writer_test, open_release_without_write)
@@ -88,8 +102,7 @@ TEST_F(video_writer_test, open_write_release_without_save)
 
     ASSERT_TRUE(v->write(frame_data.data()));
 
-    const auto is_released = v->release();
-    ASSERT_TRUE(is_released);
+    ASSERT_TRUE(v->release());
     ASSERT_FALSE(v->is_opened());
 
     // assert file does not exists
@@ -161,20 +174,20 @@ TEST_F(video_writer_test, open_same_path_three_times)
 
 TEST_F(video_writer_test, open_non_existing_path)
 {
-    const auto video_path = (default_output_directory / "not_existing" / test_name).replace_extension(default_video_extension);
-    ASSERT_FALSE(v->open(video_path, width, height, fps));
-    ASSERT_FALSE(v->is_opened());
+    const auto video_path = (default_output_directory / "not_existing_directory" / "not_existing_file").replace_extension(default_video_extension);
+    ASSERT_TRUE(v->open(video_path.c_str(), width, height, fps));
+    ASSERT_TRUE(v->is_opened());
 }
 
 TEST_F(video_writer_test, open_three_different_paths)
 {
-    const auto video_path1 = (default_output_directory / (test_name + "1")).replace_extension(default_video_extension);
+    const auto video_path1 = (default_output_directory / "1").replace_extension(default_video_extension);
     ASSERT_TRUE(v->open(video_path1, width, height, fps));
 
-    const auto video_path2 = (default_output_directory / (test_name + "2")).replace_extension(default_video_extension);
+    const auto video_path2 = (default_output_directory / "2").replace_extension(default_video_extension);
     ASSERT_TRUE(v->open(video_path2, width, height, fps));
 
-    const auto video_path3 = (default_output_directory / (test_name + "3")).replace_extension(default_video_extension);
+    const auto video_path3 = (default_output_directory / "3").replace_extension(default_video_extension);
     ASSERT_TRUE(v->open(video_path3, width, height, fps));
 
     ASSERT_TRUE(v->is_opened());
@@ -183,7 +196,7 @@ TEST_F(video_writer_test, open_three_different_paths)
 TEST_P(video_writer_test, write_n_frames)
 {
     const std::string video_extension = GetParam();
-    const auto video_path = (default_output_directory / test_name).replace_extension(video_extension);
+    const auto video_path = (default_output_directory / ("video_n_frames" + video_extension)).replace_extension(video_extension);
 
     if (!std::filesystem::exists(video_path.parent_path()))
     {
@@ -212,7 +225,7 @@ TEST_P(video_writer_test, write_n_frames)
 TEST_P(video_writer_test, write_n_seconds)
 {
     const std::string video_extension = GetParam();
-    const auto video_path = (default_output_directory / test_name).replace_extension(video_extension);
+    const auto video_path = (default_output_directory / ("video_n_seconds" + video_extension)).replace_extension(video_extension);
 
     if (!std::filesystem::exists(video_path.parent_path()))
     {
@@ -277,7 +290,7 @@ TEST_P(video_writer_test, write_parallel)
 
     for (auto i = 0; i < parallel_count; ++i)
     {
-        const auto video_path = (default_output_directory / test_name / std::to_string(i)).replace_extension(video_extension);
+        const auto video_path = (default_output_directory / (video_extension + std::to_string(i))).replace_extension(video_extension);
         threads[i] = std::thread(writer_callback, writers[i], video_path);
     }
 
@@ -289,7 +302,7 @@ TEST_P(video_writer_test, write_parallel)
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(multi_format, video_writer_test, ::testing::Values(".mp4", ".mpeg", ".avi"));
+INSTANTIATE_TEST_SUITE_P(multi_format, video_writer_test, ::testing::Values(".mp4", ".mkv"));
 
 /*
 TODO:

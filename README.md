@@ -146,15 +146,12 @@ apt-get install doxygen graphviz
 
 # Windows
 winget install doxygen
-
-# Update Doxyfile (required only after Doxygen updates)
-doxygen -u video_io/docs/Doxyfile
 ```
 
 ```bash
-python ./scripts/cmake/configure.py <Debug|Release|RelWithDebInfo>  <COMPILER_NAME> <COMPILER_VERSION> --docs
+python scripts/tools/run_doxygen.py
 ```
-Documentation is now installed in $PWD/install/docs.
+Documentation is now installed in $PWD/docs.
 
 
 ## Conan Package - Local Install
