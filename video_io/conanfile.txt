@@ -29,7 +29,7 @@ ffmpeg:disable_all_filters=True
 ffmpeg:avformat=True
 ffmpeg:avcodec=True
 ffmpeg:swscale=True
-ffmpeg:avdevice=False
+ffmpeg:avdevice=True
 ffmpeg:avfilter=False
 ffmpeg:swresample=False
 
