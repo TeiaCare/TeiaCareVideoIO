@@ -77,9 +77,9 @@ bool video_writer::open(const std::string& video_path, int width, int height, co
     {
         log_error("Could not deduce output format from file extension: using MPEG", vio::logger::get().err2str(r));
 
-        if (auto r = avformat_alloc_output_context2(&_format_ctx, nullptr, "mp4", video_path.c_str()); r < 0)
+        if (auto r_mp4 = avformat_alloc_output_context2(&_format_ctx, nullptr, "mp4", video_path.c_str()); r_mp4 < 0)
         {
-            log_error("avformat_alloc_output_context2", vio::logger::get().err2str(r));
+            log_error("avformat_alloc_output_context2", vio::logger::get().err2str(r_mp4));
             return false;
         }
     }

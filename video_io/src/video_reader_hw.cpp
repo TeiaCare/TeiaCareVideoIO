@@ -53,11 +53,11 @@ decode_support video_reader::hw_acceleration::init()
 
 #if defined(_WIN32)
         return "dxva2"; // "d3d11va";
-#endif
-#if defined(__linux__)
+#elif defined(__linux__)
         return "vaapi"; // "vdpau";
-#endif
+#else
         return "";
+#endif
     };
 
     const char* device_type_str = get_hw_video_device_type();

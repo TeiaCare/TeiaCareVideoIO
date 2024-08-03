@@ -337,7 +337,7 @@ auto video_reader::get_frame_count() const -> std::optional<int>
     {
         double duration_sec = static_cast<double>(_format_ctx->duration) / static_cast<double>(AV_TIME_BASE);
         auto fps = get_fps();
-        nb_frames = std::floor(duration_sec * fps.value() + 0.5);
+        nb_frames = static_cast<int64_t>(std::floor(duration_sec * fps.value() + 0.5));
     }
     if (nb_frames)
         return std::make_optional(static_cast<int>(nb_frames));
