@@ -39,7 +39,7 @@ def conan_profile_create(profile_name, args):
     if args.compiler == 'clang':
         cc_compiler = ''
         cxx_compiler = ''
-    
+
         if platform.system() == 'Linux':
             cc_compiler = f'clang-{args.compiler_version}'
             cxx_compiler = f'clang++-{args.compiler_version}'
@@ -104,9 +104,10 @@ def get_conanfile_directories(args):
     current_working_directory = pathlib.Path().resolve()
     conanfile_directories = []
     if not args.directories:
-        conanfile_directories_include = set(current_working_directory.glob('**/conanfile.txt'))
+        conanfile_directories_include = set(current_working_directory.glob('**/conanfile.*'))
         conanfile_directories_exclude = set(current_working_directory.glob('**/.conan/**/conanfile.*'))
-        conanfile_directories = conanfile_directories_include - conanfile_directories_exclude
+        conanfile_root = set(current_working_directory.glob('conanfile.py'))
+        conanfile_directories = conanfile_directories_include - conanfile_directories_exclude - conanfile_root
     else:
         conanfile_directories = args.directories
 

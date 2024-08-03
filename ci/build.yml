@@ -168,7 +168,6 @@ jobs:
 
         - task: PublishTestResults@2
           displayName: 'Publish Unit Tests Results'
-          continueOnError: True
           inputs:
             testResultsFormat: 'JUnit'
             testResultsFiles: 'results/unit_tests/unit_tests.xml'
