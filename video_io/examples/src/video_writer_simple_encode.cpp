@@ -65,12 +65,12 @@ void record_n_frames(const char* format)
 
     const auto video_name = std::string("out_" + std::to_string(num_frames_to_write) + "_frames" + format);
     std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / video_name;
-    const char* video_path = default_video_path.c_str();
+    const auto video_path = default_video_path.string();
     const auto fps = 30;
     const auto width = 640;
     const auto height = 480;
 
-    v.open(video_path, width, height, fps);
+    v.open(video_path.c_str(), width, height, fps);
 
     const auto frame_size = width * height * 3;
     std::array<uint8_t, frame_size> frame_data = {};
@@ -105,12 +105,12 @@ void record_n_seconds(const char* format)
 
     const auto video_name = std::string("out_" + std::to_string(num_seconds_to_write) + "_seconds" + format);
     std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / video_name;
-    const char* video_path = default_video_path.c_str();
+    const auto video_path = default_video_path.string();
     const auto fps = 30;
     const auto width = 640;
     const auto height = 480;
 
-    v.open(video_path, width, height, fps, num_seconds_to_write);
+    v.open(video_path.c_str(), width, height, fps, num_seconds_to_write);
 
     const auto frame_size = width * height * 3;
     std::array<uint8_t, frame_size> frame_data = {};

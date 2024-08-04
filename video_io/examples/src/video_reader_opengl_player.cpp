@@ -46,11 +46,11 @@ int main(int argc, char** argv)
     tc::vio::video_reader v;
 
     std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / "video_10sec_2fps_HD.mp4";
-    const char* video_path = default_video_path.c_str();
+    auto video_path = default_video_path.string();
     if (argc > 1)
         video_path = argv[1];
 
-    if (!v.open(video_path))
+    if (!v.open(video_path.c_str()))
     {
         std::cout << "Unable to open video: " << video_path << std::endl;
         return 1;

@@ -66,7 +66,7 @@ protected:
 
 void read_half_video(const std::unique_ptr<vio::video_reader>& v, const std::filesystem::path& video_path, int video_duration_in_seconds, double fps, int width, int height)
 {
-    ASSERT_TRUE(v->open(video_path.c_str()));
+    ASSERT_TRUE(v->open(video_path.string().c_str()));
     ASSERT_TRUE(v->is_opened());
 
     // Initialize the dummy frame
@@ -83,9 +83,9 @@ void read_half_video(const std::unique_ptr<vio::video_reader>& v, const std::fil
     }
 }
 
-void read_full_video(const std::unique_ptr<vio::video_reader>& v, const std::filesystem::path& video_path, int video_duration_in_seconds, double fps, int width, int height)
+void read_full_video(const std::unique_ptr<vio::video_reader>& v, const std::filesystem::path& video_path, size_t video_duration_in_seconds, double fps, size_t width, size_t height)
 {
-    ASSERT_TRUE(v->open(video_path.c_str()));
+    ASSERT_TRUE(v->open(video_path.string().c_str()));
     ASSERT_TRUE(v->is_opened());
 
     // Initialize the dummy frame
@@ -98,7 +98,7 @@ void read_full_video(const std::unique_ptr<vio::video_reader>& v, const std::fil
     double current_pts = 0.0;
 
     // The expcted number of video frames is equal to video_duration * FPS
-    const int total_frames = static_cast<int>(fps) * video_duration_in_seconds;
+    const int total_frames = static_cast<int>(fps * video_duration_in_seconds);
 
     // The expected pts increment (for each consecutive frame) is equal to 1 / FPS
     const double pts_increment = 1.0 / fps;

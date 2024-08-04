@@ -34,12 +34,12 @@ int main(int argc, char** argv)
 
     // Locate video file to be opened
     std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / "video_10sec_2fps_HD.mp4";
-    const char* video_path = default_video_path.c_str();
+    auto video_path = default_video_path.string();
     if (argc > 1)
         video_path = argv[1];
 
     // Open video (local file or RTSP stream)
-    if (!v.open(video_path)) //, vio::decode_support::HW);
+    if (!v.open(video_path.c_str())) //, vio::decode_support::HW);
     {
         std::cout << "Unable to open input video: " << video_path << std::endl;
         return EXIT_FAILURE;

@@ -85,7 +85,7 @@ public:
     {
         unique_guard g(_lock);
         if (_queue.size() >= _max_size)
-            notFullCond_.wait(g, [=] { return _queue.size() < _max_size; });
+            notFullCond_.wait(g, [=, this] { return _queue.size() < _max_size; });
         bool wasEmpty = _queue.empty();
         _queue.emplace_back(std::move(val));
         if (wasEmpty)
@@ -143,7 +143,7 @@ bool try_put_until(value_type* val, const std::chrono::time_point<Clock,Duration
     {
         unique_guard g(_lock);
         if (_queue.empty())
-            notEmptyCond_.wait(g, [=] { return !_queue.empty(); });
+            notEmptyCond_.wait(g, [=, this] { return !_queue.empty(); });
         *val = std::move(_queue.front());
         _queue.pop_front();
         if (_queue.size() == _max_size - 1)
@@ -157,7 +157,7 @@ bool try_put_until(value_type* val, const std::chrono::time_point<Clock,Duration
     {
         unique_guard g(_lock);
         if (_queue.empty())
-            notEmptyCond_.wait(g, [=] { return !_queue.empty(); });
+            notEmptyCond_.wait(g, [=, this] { return !_queue.empty(); });
         auto val = std::move(_queue.front());
         _queue.pop();
         if (_queue.size() == _max_size - 1)

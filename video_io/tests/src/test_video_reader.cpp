@@ -21,20 +21,20 @@ namespace tc::vio::tests
 
 TEST_F(video_reader_test, open_valid_video_path)
 {
-    ASSERT_TRUE(v->open(default_video_path.c_str()));
+    ASSERT_TRUE(v->open(default_video_path.string().c_str()));
     ASSERT_TRUE(v->is_opened());
 }
 
 TEST_F(video_reader_test, open_non_existing_video_path)
 {
     const auto invalid_video_path = default_input_directory / "invalid-path.mp4";
-    ASSERT_FALSE(v->open(invalid_video_path.c_str()));
+    ASSERT_FALSE(v->open(invalid_video_path.string().c_str()));
     ASSERT_FALSE(v->is_opened());
 }
 
 TEST_F(video_reader_test, open_release_without_read)
 {
-    ASSERT_TRUE(v->open(default_video_path.c_str()));
+    ASSERT_TRUE(v->open(default_video_path.string().c_str()));
     ASSERT_TRUE(v->is_opened());
 
     v->release();
@@ -43,7 +43,7 @@ TEST_F(video_reader_test, open_release_without_read)
 
 TEST_F(video_reader_test, open_read_one_frame_release)
 {
-    ASSERT_TRUE(v->open(default_video_path.c_str()));
+    ASSERT_TRUE(v->open(default_video_path.string().c_str()));
     ASSERT_TRUE(v->is_opened());
 
     uint8_t* data_buffer = frame_data.data();
@@ -74,9 +74,9 @@ TEST_F(video_reader_test, release_without_open)
 
 TEST_F(video_reader_test, open_same_path_without_read)
 {
-    ASSERT_TRUE(v->open(default_video_path.c_str()));
-    ASSERT_TRUE(v->open(default_video_path.c_str()));
-    ASSERT_TRUE(v->open(default_video_path.c_str()));
+    ASSERT_TRUE(v->open(default_video_path.string().c_str()));
+    ASSERT_TRUE(v->open(default_video_path.string().c_str()));
+    ASSERT_TRUE(v->open(default_video_path.string().c_str()));
 
     ASSERT_TRUE(v->is_opened());
 }
@@ -84,15 +84,15 @@ TEST_F(video_reader_test, open_same_path_without_read)
 TEST_F(video_reader_test, open_different_paths_without_read)
 {
     const auto video_path1 = (default_input_directory / "video_10sec_4fps_HD.mp4");
-    ASSERT_TRUE(v->open(video_path1.c_str()));
+    ASSERT_TRUE(v->open(video_path1.string().c_str()));
     ASSERT_TRUE(v->is_opened());
 
     const auto video_path2 = (default_input_directory / "video_10sec_4fps_HD.mkv");
-    ASSERT_TRUE(v->open(video_path2.c_str()));
+    ASSERT_TRUE(v->open(video_path2.string().c_str()));
     ASSERT_TRUE(v->is_opened());
 
     const auto video_path3 = (default_input_directory / "video_2sec_2fps_HD.mp4");
-    ASSERT_TRUE(v->open(video_path3.c_str()));
+    ASSERT_TRUE(v->open(video_path3.string().c_str()));
     ASSERT_TRUE(v->is_opened());
 }
 
