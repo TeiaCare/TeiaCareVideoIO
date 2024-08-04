@@ -194,6 +194,7 @@ python scripts/conan/upload.py teiacare_video_io teiacare_video_io/<PACKAGE_VERS
 
 In order to contribute to TeiaCareVideoIO, please follow our [contribution guidelines](./CONTRIBUTING).
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/53f5cd883c9a41a8acc8b06548f4a53c)](https://app.codacy.com/gh/TeiaCare/TeiaCareVideoIO?utm_source=github.com&utm_medium=referral&utm_content=TeiaCare/TeiaCareVideoIO&utm_campaign=Badge_Grade)
 [![Contributions](https://img.shields.io/badge/Contributions-Welcome-green.svg)](./CONTRIBUTING)
 
 
