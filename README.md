@@ -11,7 +11,6 @@ Welcome to TeiaCareVideoIO!
 
 ![TeiaCareVideoIO](https://socialify.git.ci/TeiaCare/TeiaCareVideoIo/image?description=1&font=Raleway&name=1&pattern=Solid&theme=Auto)
 
-
 ## Getting Started
 
 ### Create a virtual environment
@@ -153,15 +152,9 @@ sudo apt install cppcheck
 winget install cppcheck
 ```
 
+Then run CppCheck using the provided python script:
 ```bash
 python scripts/tools/run_cppcheck.py <Debug|Release|RelWithDebInfo>
-```
-
-- [cpplint](https://github.com/cpplint/cpplint) [TODO: Review]
-
-```bash
-# TODO: add python script.
-cpplint --counting=detailed  $(find teiacare_video_io* -type f -name "*.hpp" -or -name "*.cpp")
 ```
 
 
@@ -176,6 +169,7 @@ apt-get install doxygen graphviz
 winget install doxygen
 ```
 
+Then run Doxygen using the provided python script:
 ```bash
 python scripts/tools/run_doxygen.py
 ```
