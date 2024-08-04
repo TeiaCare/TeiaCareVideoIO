@@ -49,7 +49,33 @@ class TeiaCareVideoIO(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        # self.options["ffmpeg"].disable_everything=True
+        self.options["ffmpeg"].disable_all_encoders=True
+        self.options["ffmpeg"].enable_encoders='libx264'
+
+        self.options["ffmpeg"].disable_all_decoders=True
+        self.options["ffmpeg"].enable_decoders='h264,hevc,mpegvideo,mpeg1video,mpeg2video,mpeg4,mjpeg'
+
+        self.options["ffmpeg"].disable_all_muxers=True
+        self.options["ffmpeg"].enable_muxers='rtp,rtsp,mov,h264,hevc,matroska,mp4'
+
+        self.options["ffmpeg"].disable_all_demuxers=True
+        self.options["ffmpeg"].enable_demuxers='rtp,rtsp,h264,hevc,mov,matroska,mjpeg,mpeg,mpegvideo'
+
+        self.options["ffmpeg"].disable_all_protocols=True
+        self.options["ffmpeg"].enable_protocols='rtp,srtp,udp,tcp,file,async'
+
+        self.options["ffmpeg"].disable_all_parsers=True
+        self.options["ffmpeg"].disable_all_hardware_accelerators=True
+        self.options["ffmpeg"].disable_all_bitstream_filters=True
+        self.options["ffmpeg"].disable_all_devices=True
+        self.options["ffmpeg"].disable_all_filters=True
+
+        self.options["ffmpeg"].avformat=True
+        self.options["ffmpeg"].avcodec=True
+        self.options["ffmpeg"].swscale=True
+        self.options["ffmpeg"].avdevice=False
+        self.options["ffmpeg"].avfilter=False
+        self.options["ffmpeg"].swresample=False
 
         self.options["ffmpeg"].with_asm=True
         self.options["ffmpeg"].with_zlib=True
@@ -69,14 +95,19 @@ class TeiaCareVideoIO(ConanFile):
         self.options["ffmpeg"].with_libmp3lame=False
         self.options["ffmpeg"].with_libfdk_aac=False
         self.options["ffmpeg"].with_libwebp=False
-        self.options["ffmpeg"].with_ssl="openssl"
-        self.options["ffmpeg"].with_libalsa=False
-        self.options["ffmpeg"].with_pulse=False
-        self.options["ffmpeg"].with_vaapi=False
-        self.options["ffmpeg"].with_vdpau=False
-        self.options["ffmpeg"].with_vulkan=False
-        self.options["ffmpeg"].with_xcb=False
-        self.options["ffmpeg"].with_programs=False
+        self.options["ffmpeg"].with_ssl='openssl'
+        self.options["ffmpeg"].with_programs=True
+        self.options["ffmpeg"].with_libsvtav1=False
+        self.options["ffmpeg"].with_libaom=False
+        self.options["ffmpeg"].with_libdav1d=False
+
+        if self.settings.os == "Linux":
+            self.options["ffmpeg"].with_libalsa=False
+            self.options["ffmpeg"].with_pulse=False
+            self.options["ffmpeg"].with_vaapi=False
+            self.options["ffmpeg"].with_vdpau=False
+            self.options["ffmpeg"].with_vulkan=False
+            self.options["ffmpeg"].with_xcb=False
 
     def generate(self):
         tc = CMakeToolchain(self)

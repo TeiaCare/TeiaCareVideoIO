@@ -4,6 +4,11 @@ Welcome to TeiaCareVideoIO!
 
 *TeiaCareVideoIO* is a C++ video encoder and decoder library.
 
+[![Docs](https://img.shields.io/badge/Docs-TeiaCareVideoIO-white.svg)](https://teiacare.github.io/TeiaCareVideoIO/md_README.html)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/baef7f2dfab74df1985a25ee5ebcb88e)](https://app.codacy.com/gh/TeiaCare/TeiaCareVideoIO/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/baef7f2dfab74df1985a25ee5ebcb88e)](https://app.codacy.com/gh/TeiaCare/TeiaCareVideoIO/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
+[![codecov](https://codecov.io/gh/TeiaCare/TeiaCareVideoIO/branch/develop/graph/badge.svg?token=2o019cGivY)](https://codecov.io/gh/TeiaCare/TeiaCareVideoIO)
+
 ![TeiaCareVideoIO](https://socialify.git.ci/TeiaCare/TeiaCareVideoIo/image?description=1&font=Raleway&name=1&pattern=Solid&theme=Auto)
 
 
