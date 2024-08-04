@@ -77,7 +77,6 @@ class FFMPEG(ConanFile):
         self.options["ffmpeg"].with_libfdk_aac=False
         self.options["ffmpeg"].with_libwebp=False
         self.options["ffmpeg"].with_ssl='openssl'
-        self.options["ffmpeg"].with_xcb=False
         self.options["ffmpeg"].with_programs=True
         self.options["ffmpeg"].with_libsvtav1=False
         self.options["ffmpeg"].with_libaom=False
@@ -89,3 +88,4 @@ class FFMPEG(ConanFile):
             self.options["ffmpeg"].with_vaapi=False
             self.options["ffmpeg"].with_vdpau=False
             self.options["ffmpeg"].with_vulkan=False
+            self.options["ffmpeg"].with_xcb=False
