@@ -20,7 +20,7 @@ Welcome to TeiaCareVideoIO!
 python -m pip install --upgrade pip
 python -m venv .venv
 
-# Linux
+# Linux/MacOS
 echo "export CONAN_USER_HOME=$PWD" >> .venv/bin/activate
 source .venv/bin/activate
 
@@ -29,9 +29,6 @@ echo set CONAN_USER_HOME=%CD%>>.venv\Scripts\activate.bat
 .venv\Scripts\activate.bat
 
 pip install -r scripts/requirements.txt
-
-# on developer machine only (not in CI)
-pip install pre-commit==3.7.1
 pre-commit install
 ```
 
@@ -65,28 +62,52 @@ This script configures, builds and installs the library.
 python scripts/cmake.py <Debug|Release|DebWithRelInfo> <COMPILER_NAME> <COMPILER_VERSION>
 ```
 
+
 ## Examples
 
 ```bash
+# Build all the examples
 python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION> --examples --warnings
+
+# Run all the examples
+python3 scripts/tools/run_examples.py install/examples
 ```
 Examples are installed in $PWD/install/examples.
 
 
 ## Unit Tests and Code Coverage
 
-Unit tests execution requires video data generation. In order to generate such data it is required to run the following python script:
+Unit tests execution requires video data generation. In order to generate such data it is required to install FFmpeg using your OS package manager such as:
+
+```bash
+# Windows
+choco install ffmpeg -y
+
+# Linux
+sudo apt-get install -y ffmpeg
+
+# MacOS
+brew install ffmpeg
+```
+
+Once FFmpeg is installed and available on the path run the following python script:
+
 ```bash
 python3 scripts/tests/generate_test_data.py
 ```
 
-Note that code coverage is not available on Windows.
-
 ```bash
+# Build Unit Tests with Code Coverage enabled (if supported)
 python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION> --coverage --warnings
+
+# Run Unit Tests
 python scripts/tools/run_unit_tests.py <Debug|Release|RelWithDebInfo>
+
+# Run Code Covergae
 python scripts/tools/run_coverage.py <COMPILER_NAME> <COMPILER_VERSION>
 ```
+Note that code coverage is not available on Windows.
+
 Unit tests results are available in $PWD/results/unit_tests.
 Coverage results are available in $PWD/results/coverage.
 
@@ -161,37 +182,50 @@ python scripts/tools/run_doxygen.py
 Documentation is now installed in $PWD/docs.
 
 
-## Conan Package - Local Install
+## Conan Package
+
+### Local Install
+
+Create, test and install local package.
+
+Notes:
+1) The install directory path must be a valid Conan cache (i.e. ".conan" folder) located in the current directory.
+   So, in order to install the package in a desired repository folder, it is required to run this script from the repository folder directly.
+2) The Conan package tests are automatically run during package creation.
+   The directory test_package contains a test project that is built to validate the proper package creation.
 
 ```bash
-git clone https://teiacare@dev.azure.com/teiacare/Ancelia/_git/TeiaCareVideoIO
-cd TeiaCareVideoIO
+# Create the Conan package locally
+python scripts/conan/create.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION>
 
-# Create, test and install local package
-# Notes:
-# 1) The install directory path must be a valid Conan cache (i.e. ".conan" folder) located in the current directory
-#    So, in order to install the package in a desired repository folder, it is required to run this script from the repository folder directly.
-# 2) The Conan package tests are automatically run during package creation.
-#    The directory test_package contains a test project that is built to validate the proper package creation.
+# Build and install the test package executable
+python test_package/build.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION>
 
-python ./scripts/conan/create.py <Debug|Release|RelWithDebInfo>  <COMPILER_NAME> <COMPILER_VERSION>
-
-# Build, install and run the test package executable
-python test_package/build.py <Debug|Release|RelWithDebInfo>  <COMPILER_NAME> <COMPILER_VERSION>
-$PWD/install/test_package/teiacare_video_io_test_package
+# Run the test package executable
+$PWD/install/test_package/teiacare_sdk_test_package
 ```
 
 
-## Conan Package - Artifactory Setup
+### Artifactory Upload
 
-In order to push a Conan package to TeiaCare artifactory server it is required to setup you local Conan client with the following commands:
+In order to upload a Conan package to TeiaCare Artifactory server it is required to setup you local Conan client once with the following commands:
 
 ```bash
-# export CONAN_REVISIONS_ENABLED=1
-conan remote add teiacare_video_io $(artifactory.url)/teiacare_video_io
-conan user $(artifactory.username) -p $(artifactory.password) -r teiacare_video_io
+# Add TeiaCare Artifactory remote to local Conan client
+conan remote add teiacare $(artifactory.url)/teiacare
+
+# Authenticate with Artifactory credentials
+conan user $(artifactory.username) -p $(artifactory.password) -r teiacare
+```
+
+Now it is possible to create and upload a Conan package with the following commands:
+
+```bash
+# Create the Conan package locally
 python scripts/conan/create.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION>
-python scripts/conan/upload.py teiacare_video_io teiacare_video_io/<PACKAGE_VERSION>@
+
+# Upload the package to Artifactory on the teicare remote
+python scripts/conan/upload.py teiacare teiacare_video_io/<PACKAGE_VERSION>@
 ```
 
 
