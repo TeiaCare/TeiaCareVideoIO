@@ -115,7 +115,7 @@ jobs:
 
         - task: Cache@2
           inputs:
-            key: 'conan $(Agent.JobName) | video_io/examples/conanfile.txt | video_io/tests/conanfile.txt'
+            key: 'conan $(Agent.JobName) | video_io/conanfile.py | video_io/examples/conanfile.txt | video_io/tests/conanfile.txt'
             path: '$(Build.SourcesDirectory)/.conan'
           displayName: 'Cache Conan'
 
