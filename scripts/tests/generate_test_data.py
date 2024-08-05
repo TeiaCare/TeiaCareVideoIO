@@ -35,21 +35,21 @@ def ffmpeg_generate_video_commands(ffmpeg_executable, output_dir, video_formats)
     for format in video_formats:
         commands.extend([
             # Resolution
-            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=640x480:duration=10:rate=4"   -vf "drawtext=fontsize=72:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_4fps_SD.{format}',
-            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=1280x720:duration=10:rate=4"  -vf "drawtext=fontsize=72:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_4fps_HD.{format}',
-            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=1920x1080:duration=10:rate=4" -vf "drawtext=fontsize=72:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_4fps_FHD.{format}',
-            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=3840x2160:duration=10:rate=4" -vf "drawtext=fontsize=72:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_4fps_4K.{format}',
+            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=640x480:duration=10:rate=4"   -vf "drawtext=fontsize=72:fontfile=scripts/tests/Montserrat-Regular.ttf:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_4fps_SD.{format}',
+            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=1280x720:duration=10:rate=4"  -vf "drawtext=fontsize=72:fontfile=scripts/tests/Montserrat-Regular.ttf:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_4fps_HD.{format}',
+            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=1920x1080:duration=10:rate=4" -vf "drawtext=fontsize=72:fontfile=scripts/tests/Montserrat-Regular.ttf:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_4fps_FHD.{format}',
+            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=3840x2160:duration=10:rate=4" -vf "drawtext=fontsize=72:fontfile=scripts/tests/Montserrat-Regular.ttf:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_4fps_4K.{format}',
 
             # FPS
-            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=1280x720:duration=10:rate=1"  -vf "drawtext=fontsize=72:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_1fps_HD.{format}',
-            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=1280x720:duration=10:rate=2"  -vf "drawtext=fontsize=72:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_2fps_HD.{format}',
-            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=1280x720:duration=10:rate=8"  -vf "drawtext=fontsize=72:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_8fps_HD.{format}',
-            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=1280x720:duration=10:rate=16" -vf "drawtext=fontsize=72:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_16fps_HD.{format}',
-            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=1280x720:duration=10:rate=30" -vf "drawtext=fontsize=72:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_30fps_HD.{format}',
+            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=1280x720:duration=10:rate=1"  -vf "drawtext=fontsize=72:fontfile=scripts/tests/Montserrat-Regular.ttf:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_1fps_HD.{format}',
+            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=1280x720:duration=10:rate=2"  -vf "drawtext=fontsize=72:fontfile=scripts/tests/Montserrat-Regular.ttf:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_2fps_HD.{format}',
+            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=1280x720:duration=10:rate=8"  -vf "drawtext=fontsize=72:fontfile=scripts/tests/Montserrat-Regular.ttf:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_8fps_HD.{format}',
+            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=1280x720:duration=10:rate=16" -vf "drawtext=fontsize=72:fontfile=scripts/tests/Montserrat-Regular.ttf:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_16fps_HD.{format}',
+            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=1280x720:duration=10:rate=30" -vf "drawtext=fontsize=72:fontfile=scripts/tests/Montserrat-Regular.ttf:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_10sec_30fps_HD.{format}',
 
             # Duration
-            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=1280x720:duration=2:rate=2"   -vf "drawtext=fontsize=72:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_2sec_2fps_HD.{format}',
-            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=640x480:duration=120:rate=30" -vf "drawtext=fontsize=72:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_120sec_30fps_SD.{format}',
+            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=1280x720:duration=2:rate=2"   -vf "drawtext=fontsize=72:fontfile=scripts/tests/Montserrat-Regular.ttf:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_2sec_2fps_HD.{format}',
+            f'{ffmpeg_executable} -f lavfi -i "color=c=blue:size=640x480:duration=120:rate=30" -vf "drawtext=fontsize=72:fontfile=scripts/tests/Montserrat-Regular.ttf:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'%{{n}}\':start_number=1" {output_dir}/video_120sec_30fps_SD.{format}',
         ])
 
     return commands
@@ -88,7 +88,7 @@ def main():
 
     check_executable(executable)
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
         commands = ffmpeg_generate_video_commands(executable, output_dir, video_formats)
         futures = {executor.submit(create_file, cmd): cmd for cmd in commands}
         for future in concurrent.futures.as_completed(futures):

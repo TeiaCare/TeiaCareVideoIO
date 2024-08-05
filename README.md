@@ -66,7 +66,7 @@ python scripts/cmake.py <Debug|Release|DebWithRelInfo> <COMPILER_NAME> <COMPILER
 Examples and Unit Tests execution requires video data generation. In order to generate such data it is required to install FFmpeg using your OS package manager such as:
 
 ```bash
-# Windows,  using chocolatey
+# Windows, using chocolatey
 choco install ffmpeg -y
 
 # Windows, using winget
@@ -116,10 +116,39 @@ Unit tests results are available in $PWD/results/unit_tests.
 Coverage results are available in $PWD/results/coverage.
 
 
+## Sanitizers
+
+### Address Sanitizer
+
+```bash
+# Build Unit Tests with Address Sanitizer enabled (if supported)
+python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION> --address_sanitizer --unit_tests
+
+# Run Unit Tests with Address Sanitizer
+python scripts/tools/run_sanitizer.py --address_sanitizer install/unit_tests/teiacare_video_io_unit_tests
+```
+Note that Address Sanitizer is supported only on Linux.
+
+
+### Thread Sanitizer
+
+```bash
+# Build Unit Tests with Thread Sanitizer enabled (if supported)
+python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION> --thread_sanitizer --unit_tests
+
+# Run Unit Tests with Thread Sanitizer
+python scripts/tools/run_sanitizer.py --thread_sanitizer install/unit_tests/teiacare_video_io_unit_tests
+```
+Note that Thread Sanitizer is supported only on Linux.
+
+
 ## Benchmarks
 
 ```bash
+# Build Benkmarks
 python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION> --benchmarks --warnings
+
+# Run Benchmarks
 python scripts/tools/run_benchmarks.py <COMPILER_NAME> <COMPILER_VERSION>
 ```
 Benchmarks are installed in $PWD/install/benchmarks.
