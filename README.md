@@ -61,26 +61,16 @@ This script configures, builds and installs the library.
 python scripts/cmake.py <Debug|Release|DebWithRelInfo> <COMPILER_NAME> <COMPILER_VERSION>
 ```
 
+## Install FFmpeg for Examples and Unit Tests
 
-## Examples
-
-```bash
-# Build all the examples
-python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION> --examples --warnings
-
-# Run all the examples
-python3 scripts/tools/run_examples.py install/examples
-```
-Examples are installed in $PWD/install/examples.
-
-
-## Unit Tests and Code Coverage
-
-Unit tests execution requires video data generation. In order to generate such data it is required to install FFmpeg using your OS package manager such as:
+Examples and Unit Tests execution requires video data generation. In order to generate such data it is required to install FFmpeg using your OS package manager such as:
 
 ```bash
-# Windows
+# Windows,  using chocolatey
 choco install ffmpeg -y
+
+# Windows, using winget
+winget install ffmpeg
 
 # Linux
 sudo apt-get install -y ffmpeg
@@ -92,8 +82,23 @@ brew install ffmpeg
 Once FFmpeg is installed and available on the path run the following python script:
 
 ```bash
-python3 scripts/tests/generate_test_data.py
+python scripts/tests/generate_test_data.py
 ```
+
+
+## Examples
+
+```bash
+# Build all the examples
+python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION> --examples --warnings
+
+# Run all the examples
+python scripts/tools/run_examples.py install/examples
+```
+Examples are installed in $PWD/install/examples.
+
+
+## Unit Tests and Code Coverage
 
 ```bash
 # Build Unit Tests with Code Coverage enabled (if supported)

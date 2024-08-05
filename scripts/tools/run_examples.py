@@ -43,7 +43,7 @@ def examples(args):
 
     examples_found = False
     for example in examples_path.iterdir():
-        if example.is_file() and is_executable(example) and example.name in ["video_reader_simple_decode", "video_writer_simple_encode"]:
+        if example.is_file() and is_executable(example) and example.name.startswith(("video_reader_simple_decode", "video_writer_simple_encode")):
             examples_found = True
             print_example_name(example.name)
             run(example)
