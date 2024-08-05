@@ -18,6 +18,16 @@ import argparse
 import pathlib
 import sys
 import os
+import re
+
+def get_project_version():
+    with open('VERSION', encoding='utf8') as version_file:
+        version_regex = r'^\d+\.\d+\.\d+$'
+        version = version_file.read().strip()
+        if re.match(version_regex, version):
+            return version
+        else:
+            raise ValueError(f"Invalid version detected into file VERSION: {version}")
 
 def setup_conan_home():
     current_working_directory = pathlib.Path().resolve()
@@ -39,6 +49,9 @@ def run(command):
         print(f'Unhandled Exception: {e}')
 
 def conan_create(remote_name, package_name, force):
+    package_version = get_project_version()
+    print(f'{package_name}/{package_version}')
+
     command = [
         'conan',
         'upload',
@@ -46,7 +59,7 @@ def conan_create(remote_name, package_name, force):
         '--confirm',
         '--parallel',
         '--remote', remote_name,
-        package_name
+        f'{package_name}/{package_version}@'
     ]
 
     if force:

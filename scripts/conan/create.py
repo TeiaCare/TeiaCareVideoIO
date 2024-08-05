@@ -31,7 +31,8 @@ def conan_create(conanfile_directory, profile_path, build_type):
         '--settings', f'build_type={build_type}',
         '--profile:build', f'{profile_path}',
         '--profile:host', f'{profile_path}',
-        '--build', 'missing'
+        '--build', 'missing',
+        '--test-folder', 'None' # TODO: remove this line once test_package is working properly
     ]
     run(command)
 

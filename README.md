@@ -253,7 +253,7 @@ Now it is possible to create and upload a Conan package with the following comma
 python scripts/conan/create.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION>
 
 # Upload the package to Artifactory on the teicare remote
-python scripts/conan/upload.py teiacare teiacare_video_io/<PACKAGE_VERSION>@
+python scripts/conan/upload.py teiacare teiacare_video_io
 ```
 
 
