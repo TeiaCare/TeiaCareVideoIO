@@ -108,6 +108,7 @@ class TeiaCareVideoIO(ConanFile):
             self.options["ffmpeg"].with_vdpau=False
             self.options["ffmpeg"].with_vulkan=False
             self.options["ffmpeg"].with_xcb=False
+            self.options["ffmpeg"].with_xlib=False
 
     def generate(self):
         tc = CMakeToolchain(self)
