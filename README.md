@@ -12,29 +12,37 @@ Welcome to TeiaCareVideoIO!
 ![TeiaCareVideoIO](https://socialify.git.ci/TeiaCare/TeiaCareVideoIo/image?description=1&font=Raleway&name=1&pattern=Solid&theme=Auto)
 
 ## Getting Started
+```bash
+git clone https://github.com/TeiaCare/TeiaCareVideoIO.git --recursive
+```
 
-### Create a virtual environment
+### Create Development Environment
+In order to setup a development environment it is sufficient to run the script *scripts/env/setup.<bat|sh>* depending on your operating system.
 
 ```bash
-python -m pip install --upgrade pip
-python -m venv .venv
-
 # Linux/MacOS
-echo "export CONAN_USER_HOME=$PWD" >> .venv/bin/activate
+scripts/env/setup.sh
+
+# Windows
+scripts\env\setup.bat
+```
+
+### Start Development Environment
+In order to start the development environment it is sufficient to activate the Python Virtual Environment just created the step above.
+
+```bash
+# Linux/MacOS
 source .venv/bin/activate
 
 # Windows
-echo set CONAN_USER_HOME=%CD%>>.venv\Scripts\activate.bat
 .venv\Scripts\activate.bat
-
-pip install -r scripts/requirements.txt
-pre-commit install
 ```
 
 ### Setup Build Environment (Windows Only)
-
 When building from command line on Windows it is necessary to activate the Visual Studio Developer Command Prompt.
+
 Depending on the version of Visual Studio compiler and on its install location it is required to run *vcvars64.bat* script the set the development environment properly.
+
 *Note*: using Visual Studio IDE or the CMake extension for VSCode this step is already managed in the background, so no action is required.
 
 Examples:
@@ -48,17 +56,15 @@ Examples:
 ```
 
 ### Dependencies Setup
-
-This script must be executed in order to setup the conan packages (note that 3rd party libs are only required for unit tests, examples and benchmarks).
+This script must be executed in order to setup the 3rd party dependencies using conan packages.
 ```bash
-python scripts/conan/setup.py <Debug|Release|DebWithRelInfo> <COMPILER_NAME> <COMPILER_VERSION>
+python scripts/conan/setup.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION>
 ```
 
 ### Configure, Build and Install
-
 This script configures, builds and installs the library.
 ```bash
-python scripts/cmake.py <Debug|Release|DebWithRelInfo> <COMPILER_NAME> <COMPILER_VERSION>
+python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION>
 ```
 
 ## Install FFmpeg for Examples and Unit Tests

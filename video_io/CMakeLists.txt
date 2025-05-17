@@ -46,6 +46,7 @@ set_target_properties(${TARGET_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSIO
 set_target_properties(${TARGET_NAME} PROPERTIES PUBLIC_HEADER "${TARGET_HEADERS}")
 install(TARGETS ${TARGET_NAME} PUBLIC_HEADER DESTINATION include/teiacare/video_io)
 
+
 if(TC_ENABLE_WARNINGS_ERROR)
     include(warnings)
     add_warnings(${TARGET_NAME})
@@ -62,34 +63,53 @@ if(TC_ENABLE_SANITIZER_THREAD)
     add_sanitizer_thread(${TARGET_NAME})
 endif()
 
-if(TC_ENABLE_CLANG_FORMAT)
-    include(clang_format)
-    setup_target_clang_format(${TARGET_NAME} ${CMAKE_CURRENT_SOURCE_DIR})
-endif()
-
-if(TC_ENABLE_CLANG_TIDY)
-    include(clang_tidy)
-    setup_target_clang_tidy(${TARGET_NAME})
-endif()
-
-if(TC_ENABLE_CPPCHECK)
-    include(cppcheck)
-    setup_target_cppcheck(${TARGET_NAME})
-endif()
-
-if(TC_ENABLE_CPPLINT)
-    include(cpplint)
-    setup_target_cpplint(${TARGET_NAME} ${TARGET_SRC})
-endif()
-
+#################################################################
+# Unit Tests
 if(TC_ENABLE_UNIT_TESTS)
-    add_subdirectory(tests)
+    set(TEST_TARGET_NAME teiacare_inference_client_unittests)
+    find_package(GTest REQUIRED)
+    include(GoogleTest)
+
+    set(VIDEO_IO_VIDEO_DATA_ABS_PATH ${CMAKE_SOURCE_DIR}/data/)
+    configure_file(src/utils/video_data_path.cpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/utils/video_data_path.cpp)
+
+    set(UNIT_TESTS_SRC
+        tests/main.cpp
+        tests/utils/video_data_path.cpp
+        tests/utils/video_data_path.hpp
+        tests/utils/video_params.hpp
+        tests/test_video_reader.hpp
+        tests/test_video_reader.cpp
+        tests/test_video_writer.hpp
+        tests/test_video_writer.cpp
+    )
+
+    add_executable(${TEST_TARGET_NAME})
+    target_sources(${TEST_TARGET_NAME} PRIVATE ${UNIT_TESTS_SRC})
+    target_include_directories(${TEST_TARGET_NAME} PRIVATE  ${CMAKE_CURRENT_BINARY_DIR}/proto)
+    target_compile_features(${TEST_TARGET_NAME} PUBLIC cxx_std_20)
+    target_link_libraries(${TEST_TARGET_NAME}
+        PRIVATE
+            GTest::gtest
+            GTest::gmock
+            teiacare::video_io
+    )
+
+    gtest_discover_tests(${TEST_TARGET_NAME})
+    install(TARGETS ${TEST_TARGET_NAME} DESTINATION unit_tests)
+
+    if(TC_ENABLE_WARNINGS_ERROR)
+        add_warnings(${TEST_TARGET_NAME})
+        add_warnings_as_errors(${TEST_TARGET_NAME})
+    endif()
+
+    if(TC_ENABLE_UNIT_TESTS_COVERAGE)
+        include(coverage)
+        add_coverage(${TARGET_NAME})
+    endif()
 endif()
 
-if(TC_ENABLE_BENCHMARKS)
-    add_subdirectory(benchmarks)
-endif()
-
+#################################################################
+# Examples
 if(TC_ENABLE_EXAMPLES)
-    add_subdirectory(examples)
 endif()

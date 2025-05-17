@@ -1,5 +1,6 @@
 [requires]
-gtest/1.14.0
+spdlog/1.14.1
+gtest/1.15.0
 
 [generators]
 CMakeDeps
