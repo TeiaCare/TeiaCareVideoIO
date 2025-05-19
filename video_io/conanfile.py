@@ -65,7 +65,7 @@ class FFMPEG(ConanFile):
         self.options["ffmpeg"].with_libiconv=False
         self.options["ffmpeg"].with_freetype=False
         self.options["ffmpeg"].with_openjpeg=False
-        self.options["ffmpeg"].with_openh264=True
+        self.options["ffmpeg"].with_openh264=False #True
         self.options["ffmpeg"].with_opus=False
         self.options["ffmpeg"].with_vorbis=False
         self.options["ffmpeg"].with_zeromq=False
