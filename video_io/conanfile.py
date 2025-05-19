@@ -16,7 +16,7 @@
 from conans import ConanFile
 
 class FFMPEG(ConanFile):
-    requires = "ffmpeg/7.1.1"
+    requires = "ffmpeg/7.0.1"
     generators = "CMakeDeps"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
