@@ -5,7 +5,7 @@ add_library(teiacare::video_io ALIAS ${TARGET_NAME})
 find_package(ffmpeg CONFIG REQUIRED)
 
 configure_file(
-    src/version.cpp.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/version.cpp.in
     ${CMAKE_CURRENT_SOURCE_DIR}/src/version.cpp
 )
 
@@ -66,12 +66,14 @@ endif()
 #################################################################
 # Unit Tests
 if(TC_ENABLE_UNIT_TESTS)
-    set(TEST_TARGET_NAME teiacare_inference_client_unittests)
+    set(TEST_TARGET_NAME teiacare_video_io_unittests)
     find_package(GTest REQUIRED)
     include(GoogleTest)
 
     set(VIDEO_IO_VIDEO_DATA_ABS_PATH ${CMAKE_SOURCE_DIR}/data/)
-    configure_file(src/utils/video_data_path.cpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/utils/video_data_path.cpp)
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/utils/video_data_path.cpp.in
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/utils/video_data_path.cpp)
 
     set(UNIT_TESTS_SRC
         tests/main.cpp
@@ -112,4 +114,25 @@ endif()
 #################################################################
 # Examples
 if(TC_ENABLE_EXAMPLES)
+    # Video Player (Dear ImGui)
+    find_package(imgui CONFIG REQUIRED)
+    find_package(glfw3 CONFIG REQUIRED)
+    set(IMGUI_BINDINGS_DIR ${CMAKE_SOURCE_DIR}/build/imgui_bindings)
+    add_executable(video_reader_imgui_player
+        examples/video_reader_imgui_player.cpp
+        examples/utils/video_data_path.cpp
+        ${IMGUI_BINDINGS_DIR}/imgui_impl_glfw.cpp
+        ${IMGUI_BINDINGS_DIR}/imgui_impl_glfw.h
+        ${IMGUI_BINDINGS_DIR}/imgui_impl_opengl3.cpp
+        ${IMGUI_BINDINGS_DIR}/imgui_impl_opengl3.h
+    )
+    target_include_directories(video_reader_imgui_player PRIVATE ${IMGUI_BINDINGS_DIR})
+    target_compile_features(video_reader_imgui_player PUBLIC cxx_std_20)
+    target_link_libraries(video_reader_imgui_player
+        PRIVATE
+            teiacare::video_io
+            imgui::imgui
+            glfw
+    )
+    install(TARGETS video_reader_imgui_player DESTINATION examples)
 endif()

@@ -1,0 +1,1 @@
+valgrind --leak-check=full --suppressions=imgui_suppressions.supp /home/stefanolusardi/TeiaCare/TeiaCareVideoIO/build/Debug/video_io/video_reader_imgui_player /home/stefanolusardi/TeiaCare/TeiaCareVideoIO/data/video_2sec_2fps_HD.mp4
