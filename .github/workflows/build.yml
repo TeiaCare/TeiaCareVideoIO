@@ -69,36 +69,40 @@ jobs:
           python-version: '3.12'
           architecture: 'x64'
 
-      - name: Cache Virtual Environment
-        uses: actions/cache@v4
-        id: cache-venv
-        with:
-          path: .venv
-          key: venv-${{ matrix.config.os }}-${{ hashFiles('scripts/requirements.txt') }}
+      # - name: Cache Virtual Environment
+      #   uses: actions/cache@v4
+      #   id: cache-venv
+      #   with:
+      #     path: .venv
+      #     key: venv-${{ matrix.config.os }}-${{ hashFiles('scripts/requirements.txt') }}
 
-      - name: Cache Conan
-        uses: actions/cache@v4
-        with:
-          path: .conan
-          key: conan-${{ matrix.config.name }}-${{ matrix.build_type }}-${{ hashFiles('video_io/conanfile.txt') }}
+      # - name: Cache Conan
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: .conan
+      #     key: conan-${{ matrix.config.name }}-${{ matrix.build_type }}-${{ hashFiles('video_io/conanfile.txt') }}
 
+        # if: steps.cache-venv.outputs.cache-hit != 'true'
       - name: Setup Virtual Environment
-        if: steps.cache-venv.outputs.cache-hit != 'true'
         uses: ./.github/actions/shell
         with:
           commands: |
             python3 -m venv .venv
             ${{ matrix.config.activate_venv }}
             pip3 install -r scripts/requirements.txt
+            conan remote add teiacare ${{ secrets.ARTIFACTORY_URL }}/teiacare --insert 0 --force
+            conan user ${{ secrets.ARTIFACTORY_USERNAME }} -p ${{ secrets.ARTIFACTORY_PASSWORD }} -r teiacare
+        env:
+          CONAN_USER_HOME: ${{ github.workspace }}
 
       - name: Setup Conan
         uses: ./.github/actions/shell
         with:
           commands: |
             ${{ matrix.config.activate_venv }}
-            conan remote add teiacare ${{ secrets.ARTIFACTORY_URL }}/teiacare --insert 0 --force
-            conan user ${{ secrets.ARTIFACTORY_USERNAME }} -p ${{ secrets.ARTIFACTORY_PASSWORD }} -r teiacare
             python3 scripts/conan/setup.py ${{ matrix.build_type }} ${{ matrix.config.compiler }} ${{ matrix.config.compiler_version }}
+        env:
+          CONAN_USER_HOME: ${{ github.workspace }}
 
       - name: Build
         uses: ./.github/actions/shell
