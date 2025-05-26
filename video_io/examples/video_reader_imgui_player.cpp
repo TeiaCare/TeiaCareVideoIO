@@ -42,7 +42,7 @@ int main(int argc, char** argv)
     std::cout << "GLFW version: " << glfwGetVersionString() << std::endl;
     tc::vio::video_reader v;
 
-    std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / "video_10sec_2fps_HD.mp4";
+    std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / "video_120sec_2fps_HD.mp4";
     auto video_path = default_video_path.string();
     if (argc > 1)
         video_path = argv[1];
@@ -115,7 +115,7 @@ int main(int argc, char** argv)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_AutoHideTabBar);
+        // ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_AutoHideTabBar);
 
         if (!v.read(&frame_data))
         {
@@ -134,7 +134,7 @@ int main(int argc, char** argv)
 
         {
             ImGui::Begin("Video");
-            ImGui::Image((void*)static_cast<uintptr_t>(texture_handle), ImVec2(frame_width, frame_height));
+            ImGui::Image((ImTextureID)(uintptr_t)texture_handle, ImVec2(frame_width, frame_height));
             ImGui::End();
         }
 

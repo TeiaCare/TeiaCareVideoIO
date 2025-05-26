@@ -35,5 +35,5 @@ class TeiaCareVideoIOTest(ConanFile):
 
     def test(self):
         if not cross_building(self):
-            cmd = os.path.join(self.cpp.build.bindirs[0], "teiacare_video_io_package_test")
+            cmd = os.path.join(self.cpp.build.bindirs[0], "teiacare_video_io_test_package")
             self.run(cmd, env="conanrun")

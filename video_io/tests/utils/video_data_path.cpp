@@ -12,20 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
-
-#include <cstdint>
-#include <vector>
-
-namespace tc::vio::examples::utils
+namespace tc::vio::tests::utils
 {
-struct simple_frame
-{
-    explicit simple_frame() = default;
-    ~simple_frame() = default;
-
-    uint8_t* data = {};
-    double pts = 0.0;
-};
+extern const char* const video_data_path = "/home/stefanolusardi/TeiaCare/TeiaCareVideoIO/data/";
 
 }

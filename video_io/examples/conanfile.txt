@@ -1,6 +1,6 @@
 [requires]
-imgui/1.90-docking
-glfw/3.3.8
+imgui/1.91.4-docking
+glfw/3.4
 
 [generators]
 CMakeDeps

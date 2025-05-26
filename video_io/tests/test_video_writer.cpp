@@ -62,7 +62,7 @@ TEST_F(video_writer_test, open_invalid_extension_default_to_mp4)
 
     ASSERT_TRUE(v->save());
 
-    tc::vio::video_metadata expected_metadata =
+    const tc::vio::video_metadata expected_metadata =
         {
             .id = 0,
             .width = width,

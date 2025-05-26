@@ -31,6 +31,14 @@ struct video_metadata
     double avg_frame_rate;
     double duration;
     const char* codec_name;
+
+    bool operator==(const video_metadata& other) const
+    {
+        return id == other.id &&
+               width == other.width && height == other.height && nb_frames == other.nb_frames &&
+               r_frame_rate == other.r_frame_rate && avg_frame_rate == other.avg_frame_rate &&
+               duration == other.duration && codec_name == other.codec_name;
+    }
 };
 
 class video_info
