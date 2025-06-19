@@ -25,6 +25,7 @@ extern "C"
 #include <libavutil/dict.h>
 #include <libavutil/frame.h>
 #include <libavutil/hwcontext.h>
+#include <libavutil/pixdesc.h>
 #include <libswscale/swscale.h>
     // #include <libavdevice/avdevice.h> // required for screen recording only
 }
@@ -91,6 +92,8 @@ bool video_reader::open(const char* video_path, decode_support decode_preference
         log_error("av_dict_set", vio::logger::get().err2str(r));
         return false;
     }
+    av_dict_set(&_options, "rtsp_flags", "prefer_tcp", 0);
+    av_dict_set(&_options, "stimeout", "5000000", 0); // 5 second timeout
 
     return open_input(video_path, nullptr);
 }
@@ -248,7 +251,10 @@ bool video_reader::open_input(const char* input, const AVInputFormat* input_form
         _tmp_frame = _src_frame;
     }
 
-    _dst_frame->format = AVPixelFormat::AV_PIX_FMT_BGR24;
+    log_info("Source pixel format:", av_get_pix_fmt_name((AVPixelFormat)_tmp_frame->format));
+    log_info("Destination pixel format:", av_get_pix_fmt_name(AVPixelFormat::AV_PIX_FMT_RGB24));
+
+    _dst_frame->format = AVPixelFormat::AV_PIX_FMT_RGB24;
     _dst_frame->width = _codec_ctx->width;
     _dst_frame->height = _codec_ctx->height;
     if (auto r = av_frame_get_buffer(_dst_frame, 0); r < 0)

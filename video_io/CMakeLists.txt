@@ -114,6 +114,13 @@ endif()
 #################################################################
 # Examples
 if(TC_ENABLE_EXAMPLES)
+    # Video Player (OpenGL)
+    find_package(glfw3 CONFIG REQUIRED)
+    add_executable(video_reader_opengl_player examples/video_reader_opengl_player.cpp)
+    target_compile_features(video_reader_opengl_player PUBLIC cxx_std_20)
+    target_link_libraries(video_reader_opengl_player PRIVATE teiacare::video_io glfw)
+    install(TARGETS video_reader_opengl_player DESTINATION examples)
+
     # Video Player (Dear ImGui)
     find_package(imgui CONFIG REQUIRED)
     find_package(glfw3 CONFIG REQUIRED)

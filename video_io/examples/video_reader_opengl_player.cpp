@@ -45,7 +45,9 @@ int main(int argc, char** argv)
     std::cout << "GLFW version: " << glfwGetVersionString() << std::endl;
     tc::vio::video_reader v;
 
-    std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / "video_10sec_2fps_HD.mp4";
+    // std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / "video_10sec_2fps_HD.mp4";
+    std::filesystem::path default_video_path = "rtsp://videoproxy.lab.teiacare.com:30554/main/23";
+
     auto video_path = default_video_path.string();
     if (argc > 1)
         video_path = argv[1];
