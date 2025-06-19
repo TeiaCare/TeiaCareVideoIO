@@ -114,6 +114,11 @@ endif()
 #################################################################
 # Examples
 if(TC_ENABLE_EXAMPLES)
+    set(VIDEO_IO_VIDEO_DATA_ABS_PATH ${CMAKE_SOURCE_DIR}/data/)
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/examples/utils/video_data_path.hpp.in
+        ${CMAKE_CURRENT_SOURCE_DIR}/examples/utils/video_data_path.hpp)
+
     # Video Player (OpenGL)
     find_package(glfw3 CONFIG REQUIRED)
     add_executable(video_reader_opengl_player examples/video_reader_opengl_player.cpp)
@@ -127,7 +132,6 @@ if(TC_ENABLE_EXAMPLES)
     set(IMGUI_BINDINGS_DIR ${CMAKE_SOURCE_DIR}/build/imgui_bindings)
     add_executable(video_reader_imgui_player
         examples/video_reader_imgui_player.cpp
-        examples/utils/video_data_path.cpp
         ${IMGUI_BINDINGS_DIR}/imgui_impl_glfw.cpp
         ${IMGUI_BINDINGS_DIR}/imgui_impl_glfw.h
         ${IMGUI_BINDINGS_DIR}/imgui_impl_opengl3.cpp

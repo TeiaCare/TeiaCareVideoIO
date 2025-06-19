@@ -119,19 +119,9 @@ int main(int argc, char** argv)
         // ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_AutoHideTabBar);
 
         if (!v.read(&frame_data))
-        {
-            if (v.is_opened())
-            {
-                std::cout << "Video finished" << std::endl;
-                v.release();
-            }
-
             break;
-        }
-        else
-        {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame_width, frame_height, 0, GL_RGB, GL_UNSIGNED_BYTE, frame_data);
-        }
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame_width, frame_height, 0, GL_RGB, GL_UNSIGNED_BYTE, frame_data);
 
         {
             ImGui::Begin("Video");
@@ -159,6 +149,11 @@ int main(int argc, char** argv)
 
         // Limit frame rate by sleeping on the current thread...
         std::this_thread::sleep_for(100ms);
+    }
+
+    if (v.is_opened())
+    {
+        std::cout << "Video finished" << std::endl;
     }
 
     v.release();
