@@ -72,12 +72,11 @@ if(TC_ENABLE_UNIT_TESTS)
 
     set(VIDEO_IO_VIDEO_DATA_ABS_PATH ${CMAKE_SOURCE_DIR}/data/)
     configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/tests/utils/video_data_path.cpp.in
-        ${CMAKE_CURRENT_SOURCE_DIR}/tests/utils/video_data_path.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/utils/video_data_path.hpp.in
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/utils/video_data_path.hpp)
 
     set(UNIT_TESTS_SRC
         tests/main.cpp
-        tests/utils/video_data_path.cpp
         tests/utils/video_data_path.hpp
         tests/utils/video_params.hpp
         tests/test_video_reader.hpp

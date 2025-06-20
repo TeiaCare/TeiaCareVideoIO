@@ -9,11 +9,9 @@
 **/.cache
 **/.conan
 **/.clangd
-/data
 /docs
 **/launch.dev.json
 **/compile_commands.json
 **/CMakeUserPresets.json
+**/video_data_path.cpp
 video_io/src/version.cpp
-video_io/tests/src/utils/video_data_path.cpp
-video_io/examples/src/utils/video_data_path.cpp

@@ -35,7 +35,6 @@ namespace tc::vio
 {
 video_writer::video_writer() noexcept
 {
-    init();
     av_log_set_level(0);
 }
 
@@ -44,17 +43,46 @@ video_writer::~video_writer() noexcept
     release();
 }
 
-void video_writer::init()
+void video_writer::release()
 {
-    log_info("Reset video writer");
+    log_info("Release video writer");
 
-    _format_ctx = nullptr;
-    _codec_ctx = nullptr;
-    _sws_ctx = nullptr;
-    _packet = nullptr;
+    if (_sws_ctx)
+    {
+        sws_freeContext(_sws_ctx);
+        _sws_ctx = nullptr;
+    }
 
-    _frame = nullptr;
-    _tmp_frame = nullptr;
+    if (_codec_ctx)
+    {
+        avcodec_free_context(&_codec_ctx);
+        _codec_ctx = nullptr;
+    }
+
+    if (_format_ctx)
+    {
+        avformat_close_input(&_format_ctx);
+        avformat_free_context(_format_ctx);
+        _format_ctx = nullptr;
+    }
+
+    if (_packet)
+    {
+        av_packet_free(&_packet);
+        _packet = nullptr;
+    }
+
+    if (_frame)
+    {
+        av_frame_free(&_frame);
+        _frame = nullptr;
+    }
+
+    if (_tmp_frame)
+    {
+        av_frame_free(&_tmp_frame);
+        _tmp_frame = nullptr;
+    }
 
     _stream = nullptr;
     _stream_duration = -1;
@@ -66,6 +94,7 @@ bool video_writer::open(const std::string& video_path, int width, int height, co
     if (width <= 0 || height <= 0 || fps <= 0)
     {
         log_error("open: invalid parameters:", "width:", width, "height:", height, "fps:", fps);
+        release();
         return false;
     }
 
@@ -80,6 +109,7 @@ bool video_writer::open(const std::string& video_path, int width, int height, co
         if (auto r_mp4 = avformat_alloc_output_context2(&_format_ctx, nullptr, "mp4", video_path.c_str()); r_mp4 < 0)
         {
             log_error("avformat_alloc_output_context2", vio::logger::get().err2str(r_mp4));
+            release();
             return false;
         }
     }
@@ -88,12 +118,14 @@ bool video_writer::open(const std::string& video_path, int width, int height, co
     if (!codec)
     {
         log_error("Could not find encoder for:", avcodec_get_name(_format_ctx->oformat->video_codec));
+        release();
         return false;
     }
 
     if (_stream = avformat_new_stream(_format_ctx, nullptr); !_stream)
     {
         log_error("avformat_new_stream");
+        release();
         return false;
     }
     _stream->id = _format_ctx->nb_streams - 1;
@@ -104,6 +136,7 @@ bool video_writer::open(const std::string& video_path, int width, int height, co
     if (_codec_ctx = avcodec_alloc_context3(codec); !_codec_ctx)
     {
         log_error("avcodec_alloc_context3");
+        release();
         return false;
     }
 
@@ -131,18 +164,21 @@ bool video_writer::open(const std::string& video_path, int width, int height, co
     if (auto r = avcodec_open2(_codec_ctx, codec, nullptr); r < 0)
     {
         log_error("avcodec_open2", vio::logger::get().err2str(r));
+        release();
         return false;
     }
 
     if (_packet = av_packet_alloc(); !_packet)
     {
         log_error("av_packet_alloc");
+        release();
         return false;
     }
 
     if (_frame = alloc_frame(static_cast<int>(_codec_ctx->pix_fmt), _codec_ctx->width, _codec_ctx->height); !_frame)
     {
         log_error("alloc_frame");
+        release();
         return false;
     }
 
@@ -151,6 +187,7 @@ bool video_writer::open(const std::string& video_path, int width, int height, co
         if (_tmp_frame = alloc_frame(static_cast<int>(AVPixelFormat::AV_PIX_FMT_YUV420P), _codec_ctx->width, _codec_ctx->height); !_frame)
         {
             log_error("alloc_frame");
+            release();
             return false;
         }
     }
@@ -158,6 +195,7 @@ bool video_writer::open(const std::string& video_path, int width, int height, co
     if (auto r = avcodec_parameters_from_context(_stream->codecpar, _codec_ctx); r < 0)
     {
         log_error("avcodec_parameters_from_context", vio::logger::get().err2str(r));
+        release();
         return false;
     }
 
@@ -166,6 +204,7 @@ bool video_writer::open(const std::string& video_path, int width, int height, co
         if (auto r = avio_open(&_format_ctx->pb, video_path.c_str(), AVIO_FLAG_WRITE); r < 0)
         {
             log_error("avio_open", vio::logger::get().err2str(r));
+            release();
             return false;
         }
     }
@@ -173,6 +212,7 @@ bool video_writer::open(const std::string& video_path, int width, int height, co
     if (auto r = avformat_write_header(_format_ctx, nullptr); r < 0)
     {
         log_error("avformat_write_header", vio::logger::get().err2str(r));
+        release();
         return false;
     }
 
@@ -185,11 +225,15 @@ bool video_writer::open(const std::string& video_path, int width, int height, co
     if (duration <= 0)
     {
         log_error("open: invalid duration:", "duration:", duration);
+        release();
         return false;
     }
 
+    if (!open(video_path, width, height, fps))
+        return false;
+
     _stream_duration = duration;
-    return open(video_path, width, height, fps);
+    return true;
 }
 
 bool video_writer::is_opened() const
@@ -345,32 +389,7 @@ bool video_writer::save()
         }
     }
 
-    return release();
-}
-
-bool video_writer::release()
-{
-    log_info("Release video writer");
-
-    if (_codec_ctx)
-        avcodec_free_context(&_codec_ctx);
-
-    if (_frame)
-        av_frame_free(&_frame);
-
-    if (_tmp_frame)
-        av_frame_free(&_tmp_frame);
-
-    if (_packet)
-        av_packet_free(&_packet);
-
-    if (_sws_ctx)
-        sws_freeContext(_sws_ctx);
-
-    if (_format_ctx)
-        avformat_free_context(_format_ctx);
-
-    init();
+    release();
     return true;
 }
 

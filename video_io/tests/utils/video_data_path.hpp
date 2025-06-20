@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
-
 namespace tc::vio::tests::utils
 {
-extern const char* const video_data_path;
+const char* const video_data_path = "/home/stefanolusardi/TeiaCare/TeiaCareVideoIO/data/";
 
 }

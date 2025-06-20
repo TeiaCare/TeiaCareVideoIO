@@ -62,7 +62,6 @@ public:
     auto get_fps() const -> std::optional<double>;
 
 protected:
-    void init();
     bool open_input(const char* input, const AVInputFormat* input_format);
     bool decode();
     bool convert(uint8_t** data, double* pts);
@@ -71,18 +70,18 @@ protected:
     bool copy_hw_frame();
 
 private:
-    AVFormatContext* _format_ctx;
-    AVCodecContext* _codec_ctx;
-    SwsContext* _sws_ctx;
-    AVPacket* _packet;
+    AVFormatContext* _format_ctx = nullptr;
+    AVCodecContext* _codec_ctx = nullptr;
+    SwsContext* _sws_ctx = nullptr;
+    AVPacket* _packet = nullptr;
 
-    AVFrame* _src_frame;
-    AVFrame* _dst_frame;
-    AVFrame* _tmp_frame;
+    AVFrame* _src_frame = nullptr;
+    AVFrame* _dst_frame = nullptr;
+    AVFrame* _tmp_frame = nullptr;
 
-    decode_support _decode_support;
-    AVDictionary* _options;
-    int _stream_index;
+    decode_support _decode_support = decode_support::none;
+    AVDictionary* _options = nullptr;
+    int _stream_index = -1;
 
     struct hw_acceleration;
     std::unique_ptr<hw_acceleration> _hw;
