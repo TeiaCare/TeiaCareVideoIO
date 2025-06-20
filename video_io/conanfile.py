@@ -46,6 +46,8 @@ class FFMPEG(ConanFile):
         self.options["ffmpeg"].enable_protocols='rtp,srtp,udp,tcp,file,async'
 
         self.options["ffmpeg"].disable_all_parsers=True
+        self.options["ffmpeg"].enable_parsers='h264,hevc,mpegvideo,mpeg1video,mpeg2video,mpeg4,mjpeg'
+
         self.options["ffmpeg"].disable_all_hardware_accelerators=True
         self.options["ffmpeg"].disable_all_bitstream_filters=True
         self.options["ffmpeg"].disable_all_devices=True

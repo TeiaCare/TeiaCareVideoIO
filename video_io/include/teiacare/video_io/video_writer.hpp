@@ -42,29 +42,28 @@ public:
     bool open(const std::string& video_path, int width, int height, const int fps, const int duration);
     bool is_opened() const;
     bool write(const uint8_t* data);
-    bool release();
+    void release();
     bool save();
 
     bool check(const std::string& video_path);
 
 protected:
-    void init();
     bool convert(const uint8_t* data);
     bool encode(AVFrame* frame);
     AVFrame* alloc_frame(int pix_fmt, int width, int height);
 
 private:
-    AVFormatContext* _format_ctx;
-    AVCodecContext* _codec_ctx;
-    SwsContext* _sws_ctx;
-    AVPacket* _packet;
+    AVFormatContext* _format_ctx = nullptr;
+    AVCodecContext* _codec_ctx = nullptr;
+    SwsContext* _sws_ctx = nullptr;
+    AVPacket* _packet = nullptr;
 
-    AVFrame* _frame;
-    AVFrame* _tmp_frame;
+    AVFrame* _frame = nullptr;
+    AVFrame* _tmp_frame = nullptr;
 
-    AVStream* _stream;
-    int64_t _stream_duration;
-    int64_t _next_pts;
+    AVStream* _stream = nullptr;
+    int64_t _stream_duration = -1;
+    int64_t _next_pts = 0;
 };
 
 }

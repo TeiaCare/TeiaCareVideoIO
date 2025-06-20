@@ -40,12 +40,55 @@ double get_elapsed_time()
     return elapsed_time.count();
 }
 
+struct ViewportInfo
+{
+    int x, y, width, height;
+};
+
+ViewportInfo calculate_aspect_ratio_viewport(int window_width, int window_height, int frame_width, int frame_height)
+{
+    const float window_aspect = static_cast<float>(window_width) / window_height;
+    const float frame_aspect = static_cast<float>(frame_width) / frame_height;
+
+    ViewportInfo viewport;
+
+    if (window_aspect > frame_aspect)
+    {
+        // Window is wider than frame - fit to height, center horizontally
+        viewport.height = window_height;
+        viewport.width = static_cast<int>(window_height * frame_aspect);
+        viewport.x = (window_width - viewport.width) / 2;
+        viewport.y = 0;
+    }
+    else
+    {
+        // Window is taller than frame - fit to width, center vertically
+        viewport.width = window_width;
+        viewport.height = static_cast<int>(window_width / frame_aspect);
+        viewport.x = 0;
+        viewport.y = (window_height - viewport.height) / 2;
+    }
+
+    return viewport;
+}
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, width, height, 0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+}
+
 int main(int argc, char** argv)
 {
     std::cout << "GLFW version: " << glfwGetVersionString() << std::endl;
     tc::vio::video_reader v;
 
-    std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / "video_10sec_2fps_HD.mp4";
+    std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / "video_2sec_2fps_HD.mp4";
+    // std::filesystem::path default_video_path = "rtsp://videoproxy.lab.teiacare.com:30554/main/23";
+
     auto video_path = default_video_path.string();
     if (argc > 1)
         video_path = argv[1];
@@ -74,6 +117,7 @@ int main(int argc, char** argv)
     }
 
     glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     GLuint texture_handle;
     glGenTextures(1, &texture_handle);
@@ -95,6 +139,12 @@ int main(int argc, char** argv)
     tc::vio::examples::utils::simple_frame frame;
     while (!glfwWindowShouldClose(window))
     {
+        // Get current window size
+        glfwGetFramebufferSize(window, &window_width, &window_height);
+
+        // Calculate viewport to maintain aspect ratio
+        ViewportInfo viewport = calculate_aspect_ratio_viewport(window_width, window_height, frame_width, frame_height);
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (!v.read(&frame.data, &frame.pts))
@@ -113,16 +163,13 @@ int main(int argc, char** argv)
         glBegin(GL_QUADS);
 
         glTexCoord2d(0, 0);
-        glVertex2i(0, 0);
-
+        glVertex2i(viewport.x, viewport.y);
         glTexCoord2d(1, 0);
-        glVertex2i(frame_width, 0);
-
+        glVertex2i(viewport.x + viewport.width, viewport.y);
         glTexCoord2d(1, 1);
-        glVertex2i(frame_width, frame_height);
-
+        glVertex2i(viewport.x + viewport.width, viewport.y + viewport.height);
         glTexCoord2d(0, 1);
-        glVertex2i(0, frame_height);
+        glVertex2i(viewport.x, viewport.y + viewport.height);
 
         glEnd();
         glDisable(GL_TEXTURE_2D);
@@ -135,6 +182,8 @@ int main(int argc, char** argv)
 
     glfwDestroyWindow(window);
     glfwTerminate();
+
+    std::cout << "Video player finished" << std::endl;
 
     return 0;
 }

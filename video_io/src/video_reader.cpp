@@ -25,6 +25,7 @@ extern "C"
 #include <libavutil/dict.h>
 #include <libavutil/frame.h>
 #include <libavutil/hwcontext.h>
+#include <libavutil/pixdesc.h>
 #include <libswscale/swscale.h>
     // #include <libavdevice/avdevice.h> // required for screen recording only
 }
@@ -33,7 +34,6 @@ namespace tc::vio
 {
 video_reader::video_reader() noexcept
 {
-    init();
     av_log_set_level(0);
     // avdevice_register_all(); // required for screen recording only
 }
@@ -43,21 +43,64 @@ video_reader::~video_reader() noexcept
     release();
 }
 
-void video_reader::init()
+void video_reader::release()
 {
-    log_info("Reset video capture");
+    log_info("Release video reader");
 
-    _format_ctx = nullptr;
-    _codec_ctx = nullptr;
-    _sws_ctx = nullptr;
-    _packet = nullptr;
+    if (_sws_ctx)
+    {
+        sws_freeContext(_sws_ctx);
+        _sws_ctx = nullptr;
+    }
 
-    _src_frame = nullptr;
-    _tmp_frame = nullptr;
-    _dst_frame = nullptr;
+    if (_codec_ctx)
+    {
+        avcodec_free_context(&_codec_ctx);
+        _codec_ctx = nullptr;
+    }
+
+    if (_format_ctx)
+    {
+        avformat_close_input(&_format_ctx);
+        avformat_free_context(_format_ctx);
+        _format_ctx = nullptr;
+    }
+
+    if (_options)
+    {
+        av_dict_free(&_options);
+        _options = nullptr;
+    }
+
+    if (_packet)
+    {
+        av_packet_free(&_packet);
+        _packet = nullptr;
+    }
+
+    if (_src_frame)
+    {
+        av_frame_free(&_src_frame);
+        _src_frame = nullptr;
+    }
+
+    if (_dst_frame)
+    {
+        av_frame_free(&_dst_frame);
+        _dst_frame = nullptr;
+    }
+
+    if (_decode_support == decode_support::HW)
+    {
+        _hw->release();
+        if (_tmp_frame)
+        {
+            av_frame_free(&_tmp_frame);
+            _tmp_frame = nullptr;
+        }
+    }
 
     _decode_support = decode_support::none;
-    _options = nullptr;
     _stream_index = -1;
 }
 
@@ -83,14 +126,19 @@ bool video_reader::open(const char* video_path, decode_support decode_preference
     if (_format_ctx = avformat_alloc_context(); !_format_ctx)
     {
         log_error("avformat_alloc_context");
+        release();
         return false;
     }
 
     if (auto r = av_dict_set(&_options, "rtsp_transport", "tcp", 0); r < 0)
     {
         log_error("av_dict_set", vio::logger::get().err2str(r));
+        release();
         return false;
     }
+
+    av_dict_set(&_options, "rtsp_flags", "prefer_tcp", 0);
+    av_dict_set(&_options, "stimeout", "5000000", 0); // 5 second timeout
 
     return open_input(video_path, nullptr);
 }
@@ -106,6 +154,7 @@ bool video_reader::open(const char* screen_name, screen_options screen_opt)
     if (_format_ctx = avformat_alloc_context(); !_format_ctx)
     {
         log_error("avformat_alloc_context");
+        release();
         return false;
     }
 
@@ -129,18 +178,21 @@ bool video_reader::open(const char* screen_name, screen_options screen_opt)
     if (auto r = av_dict_set(&_options, "framerate", "30", 0); r < 0)
     {
         log_error("av_dict_set", vio::logger::get().err2str(r));
+        release();
         return false;
     }
 
     if (auto r = av_dict_set(&_options, "preset", "ultrafast", 0); r < 0)
     {
         log_error("av_dict_set", vio::logger::get().err2str(r));
+        release();
         return false;
     }
 
     if (auto r = av_dict_set(&_options, "video_size", "640x480", 0); r < 0)
     {
         log_error("av_dict_set", vio::logger::get().err2str(r));
+        release();
         return false;
     }
 
@@ -148,12 +200,14 @@ bool video_reader::open(const char* screen_name, screen_options screen_opt)
     if (auto r = av_dict_set(&_options, "offset_x", "50", 0); r < 0)
     {
         log_error("av_dict_set", vio::logger::get().err2str(r));
+        release();
         return false;
     }
 
     if (auto r = av_dict_set(&_options, "offset_y", "50", 0); r < 0)
     {
         log_error("av_dict_set", vio::logger::get().err2str(r));
+        release();
         return false;
     }
 
@@ -165,6 +219,7 @@ bool video_reader::open_input(const char* input, const AVInputFormat* input_form
     if (auto r = avformat_open_input(&_format_ctx, input, input_format, &_options); r < 0)
     {
         log_error("avformat_open_input", vio::logger::get().err2str(r));
+        release();
         return false;
     }
 
@@ -173,6 +228,7 @@ bool video_reader::open_input(const char* input, const AVInputFormat* input_form
     if (auto r = avformat_find_stream_info(_format_ctx, nullptr); r < 0)
     {
         log_error("avformat_find_stream_info");
+        release();
         return false;
     }
 
@@ -186,12 +242,14 @@ bool video_reader::open_input(const char* input, const AVInputFormat* input_form
     if (_stream_index = av_find_best_stream(_format_ctx, AVMediaType::AVMEDIA_TYPE_VIDEO, -1, -1, &codec, 0); _stream_index < 0)
     {
         log_error("av_find_best_stream", vio::logger::get().err2str(_stream_index));
+        release();
         return false;
     }
 
     if (_codec_ctx = avcodec_alloc_context3(codec); !_codec_ctx)
     {
         log_error("avcodec_alloc_context3");
+        release();
         return false;
     }
     _codec_ctx->thread_count = 1; // std::thread::hardware_concurrency();
@@ -199,6 +257,7 @@ bool video_reader::open_input(const char* input, const AVInputFormat* input_form
     if (auto r = avcodec_parameters_to_context(_codec_ctx, _format_ctx->streams[_stream_index]->codecpar); r < 0)
     {
         log_error("avcodec_parameters_to_context", vio::logger::get().err2str(r));
+        release();
         return false;
     }
 
@@ -212,24 +271,28 @@ bool video_reader::open_input(const char* input, const AVInputFormat* input_form
     if (auto r = avcodec_open2(_codec_ctx, codec, nullptr); r < 0)
     {
         log_error("avcodec_open2", vio::logger::get().err2str(r));
+        release();
         return false;
     }
 
     if (_packet = av_packet_alloc(); !_packet)
     {
         log_error("av_packet_alloc");
+        release();
         return false;
     }
 
     if (_src_frame = av_frame_alloc(); !_src_frame)
     {
         log_error("av_frame_alloc");
+        release();
         return false;
     }
 
     if (_dst_frame = av_frame_alloc(); !_dst_frame)
     {
         log_error("av_frame_alloc");
+        release();
         return false;
     }
 
@@ -239,6 +302,7 @@ bool video_reader::open_input(const char* input, const AVInputFormat* input_form
         if (_tmp_frame = av_frame_alloc(); !_tmp_frame)
         {
             log_error("av_frame_alloc");
+            release();
             return false;
         }
     }
@@ -248,12 +312,16 @@ bool video_reader::open_input(const char* input, const AVInputFormat* input_form
         _tmp_frame = _src_frame;
     }
 
-    _dst_frame->format = AVPixelFormat::AV_PIX_FMT_BGR24;
+    log_info("Source pixel format:", av_get_pix_fmt_name((AVPixelFormat)_tmp_frame->format));
+    log_info("Destination pixel format:", av_get_pix_fmt_name(AVPixelFormat::AV_PIX_FMT_RGB24));
+
+    _dst_frame->format = AVPixelFormat::AV_PIX_FMT_RGB24;
     _dst_frame->width = _codec_ctx->width;
     _dst_frame->height = _codec_ctx->height;
     if (auto r = av_frame_get_buffer(_dst_frame, 0); r < 0)
     {
         log_error("av_frame_get_buffer", vio::logger::get().err2str(r));
+        release();
         return false;
     }
 
@@ -285,43 +353,6 @@ bool video_reader::read(uint8_t** data, double* pts)
 
     // ++current_frame;
     return true;
-}
-
-void video_reader::release()
-{
-    log_info("Release video reader");
-
-    if (_sws_ctx)
-        sws_freeContext(_sws_ctx);
-
-    if (_codec_ctx)
-        avcodec_free_context(&_codec_ctx);
-
-    if (_format_ctx)
-    {
-        avformat_close_input(&_format_ctx);
-        avformat_free_context(_format_ctx);
-    }
-
-    if (_options)
-        av_dict_free(&_options);
-
-    if (_packet)
-        av_packet_free(&_packet);
-
-    if (_src_frame)
-        av_frame_free(&_src_frame);
-
-    if (_dst_frame)
-        av_frame_free(&_dst_frame);
-
-    if (_tmp_frame && _decode_support == decode_support::HW)
-        av_frame_free(&_tmp_frame);
-
-    init();
-
-    if (_decode_support == decode_support::HW)
-        _hw->release();
 }
 
 auto video_reader::get_frame_count() const -> std::optional<int>
@@ -446,7 +477,11 @@ bool video_reader::convert(uint8_t** data, double* pts)
     if (_decode_support == decode_support::HW)
     {
         if (!copy_hw_frame())
+        {
+            log_error("Failed to copy HW frame");
+            release();
             return false;
+        }
     }
 
     if (!_sws_ctx)
@@ -459,6 +494,7 @@ bool video_reader::convert(uint8_t** data, double* pts)
         if (!_sws_ctx)
         {
             log_error("Unable to initialize SwsContext");
+            release();
             return false;
         }
     }

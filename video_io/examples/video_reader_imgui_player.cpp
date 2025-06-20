@@ -42,7 +42,8 @@ int main(int argc, char** argv)
     std::cout << "GLFW version: " << glfwGetVersionString() << std::endl;
     tc::vio::video_reader v;
 
-    std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / "video_120sec_2fps_HD.mp4";
+    // std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / "video_10sec_30fps_HD.mkv";
+    std::filesystem::path default_video_path = "rtsp://videoproxy.lab.teiacare.com:30554/main/23";
     auto video_path = default_video_path.string();
     if (argc > 1)
         video_path = argv[1];
@@ -98,7 +99,7 @@ int main(int argc, char** argv)
     GLuint texture_handle;
     glGenTextures(1, &texture_handle);
     glBindTexture(GL_TEXTURE_2D, texture_handle);
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 1);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -118,19 +119,9 @@ int main(int argc, char** argv)
         // ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_AutoHideTabBar);
 
         if (!v.read(&frame_data))
-        {
-            if (v.is_opened())
-            {
-                std::cout << "Video finished" << std::endl;
-                v.release();
-            }
-
             break;
-        }
-        else
-        {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame_width, frame_height, 0, GL_RGB, GL_UNSIGNED_BYTE, frame_data);
-        }
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame_width, frame_height, 0, GL_RGB, GL_UNSIGNED_BYTE, frame_data);
 
         {
             ImGui::Begin("Video");
@@ -158,6 +149,11 @@ int main(int argc, char** argv)
 
         // Limit frame rate by sleeping on the current thread...
         std::this_thread::sleep_for(100ms);
+    }
+
+    if (v.is_opened())
+    {
+        std::cout << "Video finished" << std::endl;
     }
 
     v.release();
