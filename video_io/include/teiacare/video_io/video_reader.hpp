@@ -25,32 +25,18 @@ struct AVCodec;
 struct AVPacket;
 struct AVFrame;
 struct SwsContext;
-struct AVDictionary;
 struct AVInputFormat;
+struct AVDictionary;
 
 namespace tc::vio
 {
-enum class decode_support
-{
-    none,
-    SW,
-    HW
-};
-struct screen_options
-{
-};
-
 class video_reader
 {
 public:
     explicit video_reader() noexcept;
     ~video_reader() noexcept;
 
-    // using log_callback_t = std::function<void(const std::string&)>;
-    // void set_log_callback(const log_callback_t& cb, const log_level& level = log_level::all);
-
-    bool open(const char* video_path, decode_support decode_preference = decode_support::none);
-    bool open(const char* screen_name, screen_options screen_opt);
+    bool open(const char* video_path);
     bool is_opened() const;
     bool read(uint8_t** data, double* pts = nullptr);
     void release();
@@ -62,12 +48,9 @@ public:
     auto get_fps() const -> std::optional<double>;
 
 protected:
-    bool open_input(const char* input, const AVInputFormat* input_format);
     bool decode();
     bool convert(uint8_t** data, double* pts);
-    bool reset_data(uint8_t** data, double* pts) const;
-    bool flush();
-    bool copy_hw_frame();
+    void reset_data(uint8_t** data, double* pts) const;
 
 private:
     AVFormatContext* _format_ctx = nullptr;
@@ -77,14 +60,9 @@ private:
 
     AVFrame* _src_frame = nullptr;
     AVFrame* _dst_frame = nullptr;
-    AVFrame* _tmp_frame = nullptr;
 
-    decode_support _decode_support = decode_support::none;
     AVDictionary* _options = nullptr;
     int _stream_index = -1;
-
-    struct hw_acceleration;
-    std::unique_ptr<hw_acceleration> _hw;
 };
 
 }

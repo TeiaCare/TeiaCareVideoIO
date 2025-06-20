@@ -20,8 +20,6 @@ set(TARGET_SOURCES
     src/logger.hpp
     src/version.cpp
     src/video_info.cpp
-    src/video_reader_hw.cpp
-    src/video_reader_hw.hpp
     src/video_reader.cpp
     src/video_writer.cpp
 )
@@ -117,6 +115,18 @@ if(TC_ENABLE_EXAMPLES)
     configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/examples/utils/video_data_path.hpp.in
         ${CMAKE_CURRENT_SOURCE_DIR}/examples/utils/video_data_path.hpp)
+
+    # Example decoding - Video Reader
+    add_executable(example_simple_decode examples/example_simple_decode.cpp)
+    target_compile_features(example_simple_decode PUBLIC cxx_std_20)
+    target_link_libraries(example_simple_decode PRIVATE teiacare::video_io)
+    install(TARGETS example_simple_decode DESTINATION examples)
+
+    # Example encoding - Video Writer
+    add_executable(example_simple_encode examples/example_simple_encode.cpp)
+    target_compile_features(example_simple_encode PUBLIC cxx_std_20)
+    target_link_libraries(example_simple_encode PRIVATE teiacare::video_io)
+    install(TARGETS example_simple_encode DESTINATION examples)
 
     # Video Player (OpenGL)
     find_package(glfw3 CONFIG REQUIRED)

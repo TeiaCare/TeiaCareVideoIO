@@ -86,7 +86,7 @@ int main(int argc, char** argv)
     std::cout << "GLFW version: " << glfwGetVersionString() << std::endl;
     tc::vio::video_reader v;
 
-    std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / "video_2sec_2fps_HD.mp4";
+    std::filesystem::path default_video_path = "/home/stefanolusardi/TeiaCare/TeiaCareVideoIO/data/video_10sec_4fps_4K.mp4"; // std::filesystem::path(tc::vio::examples::utils::video_data_path) / "video_120sec_30fps_SD.mp4";
     // std::filesystem::path default_video_path = "rtsp://videoproxy.lab.teiacare.com:30554/main/23";
 
     auto video_path = default_video_path.string();
@@ -136,15 +136,15 @@ int main(int argc, char** argv)
     glOrtho(0, window_width, window_height, 0, -1, 1);
     glMatrixMode(GL_MODELVIEW);
 
+    // Get current window size
+    glfwGetFramebufferSize(window, &window_width, &window_height);
+
+    // Calculate viewport to maintain aspect ratio
+    ViewportInfo viewport = calculate_aspect_ratio_viewport(window_width, window_height, frame_width, frame_height);
+
     tc::vio::examples::utils::simple_frame frame;
     while (!glfwWindowShouldClose(window))
     {
-        // Get current window size
-        glfwGetFramebufferSize(window, &window_width, &window_height);
-
-        // Calculate viewport to maintain aspect ratio
-        ViewportInfo viewport = calculate_aspect_ratio_viewport(window_width, window_height, frame_width, frame_height);
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (!v.read(&frame.data, &frame.pts))

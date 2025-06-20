@@ -39,20 +39,19 @@ int main(int argc, char** argv)
         video_path = argv[1];
 
     // Open video (local file or RTSP stream)
-    if (!v.open(video_path.c_str())) //, vio::decode_support::HW);
+    if (!v.open(video_path.c_str()))
     {
         std::cout << "Unable to open input video: " << video_path << std::endl;
         return EXIT_FAILURE;
     }
 
-    // Retrieve video info
-    std::cout << "Opened input video: " << video_path << std::endl;
+    // Read video metadata (fps, frame size, ...)
     const auto fps = v.get_fps();
-    const auto size = v.get_frame_size();
-    const auto [width, height] = size.value();
-    std::cout << "FPS: " << fps.value() << "\n"
-              << "Frame Size: [" << width << ", " << height << "]"
-              << std::endl;
+    std::cout << "FPS: " << fps.value() << "\n";
+
+    const auto frame_size = v.get_frame_size();
+    const auto [width, height] = frame_size.value();
+    std::cout << "Frame Size: [" << width << ", " << height << "]\n";
 
     // Read video frame by frame
     std::cout << "Start decoding frames" << std::endl;
