@@ -135,6 +135,13 @@ if(TC_ENABLE_EXAMPLES)
     target_link_libraries(video_reader_opengl_player PRIVATE teiacare::video_io glfw)
     install(TARGETS video_reader_opengl_player DESTINATION examples)
 
+    # Video Player with multi threading (OpenGL)
+    find_package(glfw3 CONFIG REQUIRED)
+    add_executable(video_reader_opengl_player_mt examples/video_reader_opengl_player_multi_thread.cpp)
+    target_compile_features(video_reader_opengl_player_mt PUBLIC cxx_std_20)
+    target_link_libraries(video_reader_opengl_player_mt PRIVATE teiacare::video_io glfw)
+    install(TARGETS video_reader_opengl_player_mt DESTINATION examples)
+
     # Video Player (Dear ImGui)
     find_package(imgui CONFIG REQUIRED)
     find_package(glfw3 CONFIG REQUIRED)
