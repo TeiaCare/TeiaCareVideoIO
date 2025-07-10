@@ -72,16 +72,16 @@ void video_writer::release()
         _packet = nullptr;
     }
 
-    if (_frame)
+    if (_src_frame)
     {
-        av_frame_free(&_frame);
-        _frame = nullptr;
+        av_frame_free(&_src_frame);
+        _src_frame = nullptr;
     }
 
-    if (_tmp_frame)
+    if (_dst_frame)
     {
-        av_frame_free(&_tmp_frame);
-        _tmp_frame = nullptr;
+        av_frame_free(&_dst_frame);
+        _dst_frame = nullptr;
     }
 
     _stream = nullptr;
@@ -91,14 +91,13 @@ void video_writer::release()
 
 bool video_writer::open(const std::string& video_path, int width, int height, const int fps)
 {
+    release();
+
     if (width <= 0 || height <= 0 || fps <= 0)
     {
         log_error("open: invalid parameters:", "width:", width, "height:", height, "fps:", fps);
-        release();
         return false;
     }
-
-    release();
 
     log_info("Opening video path:", video_path, "width:", width, "height:", height, "fps:", fps);
 
@@ -175,7 +174,7 @@ bool video_writer::open(const std::string& video_path, int width, int height, co
         return false;
     }
 
-    if (_frame = alloc_frame(static_cast<int>(_codec_ctx->pix_fmt), _codec_ctx->width, _codec_ctx->height); !_frame)
+    if (_dst_frame = alloc_frame(static_cast<int>(_codec_ctx->pix_fmt), _codec_ctx->width, _codec_ctx->height); !_dst_frame)
     {
         log_error("alloc_frame");
         release();
@@ -184,7 +183,7 @@ bool video_writer::open(const std::string& video_path, int width, int height, co
 
     if (_codec_ctx->pix_fmt != AV_PIX_FMT_YUV420P)
     {
-        if (_tmp_frame = alloc_frame(static_cast<int>(AVPixelFormat::AV_PIX_FMT_YUV420P), _codec_ctx->width, _codec_ctx->height); !_frame)
+        if (_src_frame = alloc_frame(static_cast<int>(AVPixelFormat::AV_PIX_FMT_YUV420P), _codec_ctx->width, _codec_ctx->height); !_dst_frame)
         {
             log_error("alloc_frame");
             release();
@@ -263,6 +262,20 @@ AVFrame* video_writer::alloc_frame(int pix_fmt, int width, int height)
     return frame;
 }
 
+bool video_writer::write(const uint8_t* data)
+{
+    if (!is_opened())
+        return false;
+
+    if (!convert(data))
+        return false;
+
+    if (!encode(_dst_frame))
+        return false;
+
+    return true;
+}
+
 bool video_writer::encode(AVFrame* frame)
 {
     if (auto r = avcodec_send_frame(_codec_ctx, frame); r < 0)
@@ -306,7 +319,7 @@ bool video_writer::convert(const uint8_t* data)
     }
 
     // when we pass a frame to the encoder, it may keep a reference to it internally; make sure we do not overwrite it here
-    if (auto r = av_frame_make_writable(_frame); r < 0)
+    if (auto r = av_frame_make_writable(_dst_frame); r < 0)
     {
         log_error("av_frame_make_writable", vio::logger::get().err2str(r));
         return false;
@@ -317,11 +330,10 @@ bool video_writer::convert(const uint8_t* data)
         // as we only generate a YUV420P picture, we must convert it to the codec pixel format if needed
         if (!_sws_ctx)
         {
-            // _sws_ctx = sws_getContext(
             _sws_ctx = sws_getCachedContext(_sws_ctx,
                                             _codec_ctx->width, _codec_ctx->height, AVPixelFormat::AV_PIX_FMT_YUV420P,
                                             _codec_ctx->width, _codec_ctx->height, _codec_ctx->pix_fmt,
-                                            SWS_BICUBIC, nullptr, nullptr, nullptr);
+                                            SWS_BILINEAR, nullptr, nullptr, nullptr);
 
             if (!_sws_ctx)
             {
@@ -330,39 +342,24 @@ bool video_writer::convert(const uint8_t* data)
             }
         }
 
-        if (auto r = av_image_fill_arrays(_tmp_frame->data, _tmp_frame->linesize, data, _codec_ctx->pix_fmt, _codec_ctx->width, _codec_ctx->height, 1); r < 0)
+        if (auto r = av_image_fill_arrays(_src_frame->data, _src_frame->linesize, data, _codec_ctx->pix_fmt, _codec_ctx->width, _codec_ctx->height, 1); r < 0)
         {
             log_error("av_image_fill_arrays", vio::logger::get().err2str(r));
             return false;
         }
 
-        sws_scale(_sws_ctx, _tmp_frame->data, _tmp_frame->linesize, 0,
-                  _codec_ctx->height, _frame->data, _frame->linesize);
+        sws_scale(_sws_ctx, _src_frame->data, _src_frame->linesize, 0, _codec_ctx->height, _dst_frame->data, _dst_frame->linesize);
     }
     else
     {
-        if (auto r = av_image_fill_arrays(_frame->data, _frame->linesize, data, _codec_ctx->pix_fmt, _codec_ctx->width, _codec_ctx->height, 1); r < 0)
+        if (auto r = av_image_fill_arrays(_dst_frame->data, _dst_frame->linesize, data, _codec_ctx->pix_fmt, _codec_ctx->width, _codec_ctx->height, 1); r < 0)
         {
             log_error("av_image_fill_arrays", vio::logger::get().err2str(r));
             return false;
         }
     }
 
-    _frame->pts = _next_pts++; // Timestamp increment must be 1 for fixed-fps content
-
-    return true;
-}
-
-bool video_writer::write(const uint8_t* data)
-{
-    if (!is_opened())
-        return false;
-
-    if (!convert(data))
-        return false;
-
-    if (!encode(_frame))
-        return false;
+    _dst_frame->pts = _next_pts++; // Timestamp increment must be 1 for fixed-fps content
 
     return true;
 }
@@ -415,12 +412,7 @@ bool video_writer::check(const std::string& video_path)
         return false;
     }
 
-#if LIBAVCODEC_VERSION_MAJOR <= 58
-    AVCodec* codec = nullptr;
-#elif LIBAVCODEC_VERSION_MAJOR >= 59
     const AVCodec* codec = nullptr;
-#endif
-
     int stream_index = av_find_best_stream(fmt_ctx, AVMediaType::AVMEDIA_TYPE_VIDEO, -1, -1, &codec, 0);
     if (stream_index < 0)
     {

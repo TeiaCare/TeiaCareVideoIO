@@ -69,9 +69,7 @@ int main(int argc, char** argv)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    const auto window_width = 1280;
-    const auto window_height = 720;
-    GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Video Player imgui", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(frame_width, frame_height, "Video Player imgui", NULL, NULL);
     if (!window)
     {
         std::cout << "Couldn't open window" << std::endl;
@@ -84,7 +82,7 @@ int main(int argc, char** argv)
     int screen_width, screen_height;
     glfwGetFramebufferSize(window, &screen_width, &screen_height);
     glViewport(0, 0, screen_width, screen_height);
-    glfwSetWindowAspectRatio(window, window_width, window_height);
+    glfwSetWindowAspectRatio(window, frame_width, frame_height);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();

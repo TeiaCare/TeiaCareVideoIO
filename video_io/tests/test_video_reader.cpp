@@ -19,26 +19,11 @@
 
 namespace tc::vio::tests
 {
-TEST_F(video_reader_test, open_with_hw_acceleration_preference)
+TEST_F(video_reader_test, open)
 {
-    ASSERT_TRUE(v->open(default_video_path.string().c_str(), decode_support::HW));
+    ASSERT_TRUE(v->open(default_video_path.string().c_str()));
     ASSERT_TRUE(v->is_opened());
 }
-
-TEST_F(video_reader_test, open_with_sw_acceleration_preference)
-{
-    ASSERT_TRUE(v->open(default_video_path.string().c_str(), decode_support::SW));
-    ASSERT_TRUE(v->is_opened());
-}
-
-// Screen capture tests
-// TEST_F(video_reader_test, open_screen_capture)
-// {
-//     screen_options opts{};
-//     // This might fail on CI environments, so we just check it doesn't crash
-//     v->open("screen", opts);
-//     // No assertion on success since screen capture availability varies
-// }
 
 // Getter method tests
 TEST_F(video_reader_test, get_frame_count_without_open)

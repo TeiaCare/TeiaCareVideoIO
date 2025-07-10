@@ -16,7 +16,6 @@
 
 #include <chrono>
 #include <memory>
-#include <optional>
 #include <string>
 
 struct AVFormatContext;
@@ -24,8 +23,8 @@ struct AVCodecContext;
 struct AVCodec;
 struct AVPacket;
 struct AVFrame;
-struct SwsContext;
 struct AVStream;
+struct SwsContext;
 
 namespace tc::vio
 {
@@ -34,9 +33,6 @@ class video_writer
 public:
     explicit video_writer() noexcept;
     ~video_writer() noexcept;
-
-    // using log_callback_t = std::function<void(const std::string&)>;
-    // void set_log_callback(const log_callback_t& cb, const log_level& level = log_level::all);
 
     bool open(const std::string& video_path, int width, int height, const int fps);
     bool open(const std::string& video_path, int width, int height, const int fps, const int duration);
@@ -58,8 +54,8 @@ private:
     SwsContext* _sws_ctx = nullptr;
     AVPacket* _packet = nullptr;
 
-    AVFrame* _frame = nullptr;
-    AVFrame* _tmp_frame = nullptr;
+    AVFrame* _src_frame = nullptr;
+    AVFrame* _dst_frame = nullptr;
 
     AVStream* _stream = nullptr;
     int64_t _stream_duration = -1;

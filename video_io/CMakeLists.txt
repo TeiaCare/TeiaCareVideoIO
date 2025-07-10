@@ -20,8 +20,6 @@ set(TARGET_SOURCES
     src/logger.hpp
     src/version.cpp
     src/video_info.cpp
-    src/video_reader_hw.cpp
-    src/video_reader_hw.hpp
     src/video_reader.cpp
     src/video_writer.cpp
 )
@@ -118,12 +116,31 @@ if(TC_ENABLE_EXAMPLES)
         ${CMAKE_CURRENT_SOURCE_DIR}/examples/utils/video_data_path.hpp.in
         ${CMAKE_CURRENT_SOURCE_DIR}/examples/utils/video_data_path.hpp)
 
+    # Example decoding - Video Reader
+    add_executable(example_simple_decode examples/example_simple_decode.cpp)
+    target_compile_features(example_simple_decode PUBLIC cxx_std_20)
+    target_link_libraries(example_simple_decode PRIVATE teiacare::video_io)
+    install(TARGETS example_simple_decode DESTINATION examples)
+
+    # Example encoding - Video Writer
+    add_executable(example_simple_encode examples/example_simple_encode.cpp)
+    target_compile_features(example_simple_encode PUBLIC cxx_std_20)
+    target_link_libraries(example_simple_encode PRIVATE teiacare::video_io)
+    install(TARGETS example_simple_encode DESTINATION examples)
+
     # Video Player (OpenGL)
     find_package(glfw3 CONFIG REQUIRED)
     add_executable(video_reader_opengl_player examples/video_reader_opengl_player.cpp)
     target_compile_features(video_reader_opengl_player PUBLIC cxx_std_20)
     target_link_libraries(video_reader_opengl_player PRIVATE teiacare::video_io glfw)
     install(TARGETS video_reader_opengl_player DESTINATION examples)
+
+    # Video Player with multi threading (OpenGL)
+    find_package(glfw3 CONFIG REQUIRED)
+    add_executable(video_reader_opengl_player_mt examples/video_reader_opengl_player_multi_thread.cpp)
+    target_compile_features(video_reader_opengl_player_mt PUBLIC cxx_std_20)
+    target_link_libraries(video_reader_opengl_player_mt PRIVATE teiacare::video_io glfw)
+    install(TARGETS video_reader_opengl_player_mt DESTINATION examples)
 
     # Video Player (Dear ImGui)
     find_package(imgui CONFIG REQUIRED)
