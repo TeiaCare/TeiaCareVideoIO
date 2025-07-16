@@ -10,6 +10,8 @@ configure_file(
 )
 
 set(TARGET_HEADERS
+    include/teiacare/video_io/ivideo_reader.hpp
+    include/teiacare/video_io/ivideo_writer.hpp
     include/teiacare/video_io/version.hpp
     include/teiacare/video_io/video_info.hpp
     include/teiacare/video_io/video_reader.hpp

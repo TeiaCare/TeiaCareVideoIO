@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <teiacare/video_io/ivideo_reader.hpp>
+
 #include <chrono>
 #include <memory>
 #include <optional>
@@ -30,22 +32,22 @@ struct AVDictionary;
 
 namespace tc::vio
 {
-class video_reader
+class video_reader : public tc::vio::ivideo_reader
 {
 public:
     explicit video_reader() noexcept;
-    ~video_reader() noexcept;
+    ~video_reader() noexcept override;
 
-    bool open(const char* video_path);
-    bool is_opened() const;
-    bool read(uint8_t** data, double* pts = nullptr);
-    void release();
+    bool open(const char* video_path) override;
+    bool is_opened() const override;
+    bool read(uint8_t** data, double* pts = nullptr) override;
+    void release() override;
 
-    auto get_frame_count() const -> std::optional<int>;
-    auto get_duration() const -> std::optional<std::chrono::steady_clock::duration>;
-    auto get_frame_size() const -> std::optional<std::tuple<int, int>>;
-    auto get_frame_size_in_bytes() const -> std::optional<int>;
-    auto get_fps() const -> std::optional<double>;
+    auto get_frame_count() const -> std::optional<int> override;
+    auto get_duration() const -> std::optional<std::chrono::steady_clock::duration> override;
+    auto get_frame_size() const -> std::optional<std::tuple<int, int>> override;
+    auto get_frame_size_in_bytes() const -> std::optional<int> override;
+    auto get_fps() const -> std::optional<double> override;
 
 protected:
     bool decode();

@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <teiacare/video_io/ivideo_writer.hpp>
+
 #include <chrono>
 #include <memory>
 #include <string>
@@ -28,20 +30,20 @@ struct SwsContext;
 
 namespace tc::vio
 {
-class video_writer
+class video_writer : public tc::vio::ivideo_writer
 {
 public:
     explicit video_writer() noexcept;
-    ~video_writer() noexcept;
+    ~video_writer() noexcept override;
 
-    bool open(const std::string& video_path, int width, int height, const int fps);
-    bool open(const std::string& video_path, int width, int height, const int fps, const int duration);
-    bool is_opened() const;
-    bool write(const uint8_t* data);
-    void release();
-    bool save();
+    bool open(const std::string& video_path, int width, int height, const int fps) override;
+    bool open(const std::string& video_path, int width, int height, const int fps, const int duration) override;
+    bool is_opened() const override;
+    bool write(const uint8_t* data) override;
+    void release() override;
+    bool save() override;
 
-    bool check(const std::string& video_path);
+    bool check(const std::string& video_path) override;
 
 protected:
     bool convert(const uint8_t* data);

@@ -84,7 +84,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 int main(int argc, char** argv)
 {
     std::cout << "GLFW version: " << glfwGetVersionString() << std::endl;
-    tc::vio::video_reader v;
+    std::unique_ptr<tc::vio::ivideo_reader> v = std::make_unique<tc::vio::video_reader>();
 
     std::filesystem::path default_video_path = "/home/stefanolusardi/TeiaCare/TeiaCareVideoIO/data/video_10sec_4fps_4K.mp4"; // std::filesystem::path(tc::vio::examples::utils::video_data_path) / "video_120sec_30fps_SD.mp4";
     // std::filesystem::path default_video_path = "rtsp://videoproxy.lab.teiacare.com:30554/main/23";
@@ -93,14 +93,14 @@ int main(int argc, char** argv)
     if (argc > 1)
         video_path = argv[1];
 
-    if (!v.open(video_path.c_str()))
+    if (!v->open(video_path.c_str()))
     {
         std::cout << "Unable to open video: " << video_path << std::endl;
         return 1;
     }
 
-    const auto fps = v.get_fps();
-    const auto size = v.get_frame_size();
+    const auto fps = v->get_fps();
+    const auto size = v->get_frame_size();
     const auto [frame_width, frame_height] = size.value();
 
     if (!glfwInit())
@@ -147,7 +147,7 @@ int main(int argc, char** argv)
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        if (!v.read(&frame.data, &frame.pts))
+        if (!v->read(&frame.data, &frame.pts))
         {
             std::cout << "Video finished" << std::endl;
             break;
@@ -178,7 +178,7 @@ int main(int argc, char** argv)
         glfwPollEvents();
     }
 
-    v.release();
+    v->release();
 
     glfwDestroyWindow(window);
     glfwTerminate();
