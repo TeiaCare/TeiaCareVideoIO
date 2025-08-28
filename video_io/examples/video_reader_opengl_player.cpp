@@ -143,6 +143,9 @@ int main(int argc, char** argv)
     ViewportInfo viewport = calculate_aspect_ratio_viewport(window_width, window_height, frame_width, frame_height);
 
     tc::vio::examples::utils::simple_frame frame;
+    std::vector<uint8_t> d(frame_width * frame_height * 3);
+    frame.data = d.data();
+
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -153,6 +156,7 @@ int main(int argc, char** argv)
             break;
         }
 
+        std::cout << "[PTS] " << frame.pts << std::endl;
         if (const auto timeout = frame.pts - get_elapsed_time(); timeout > 0.0)
             std::this_thread::sleep_for(std::chrono::duration<double>(timeout));
 

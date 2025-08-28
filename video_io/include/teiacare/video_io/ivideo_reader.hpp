@@ -25,7 +25,7 @@ class ivideo_reader
 public:
     virtual ~ivideo_reader() = default;
 
-    virtual bool open(const char* video_path) = 0;
+    virtual bool open(const std::string& video_path) = 0;
     virtual bool is_opened() const = 0;
     virtual bool read(uint8_t** data, double* pts = nullptr) = 0;
     virtual void release() = 0;

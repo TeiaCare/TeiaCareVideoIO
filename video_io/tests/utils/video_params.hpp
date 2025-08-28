@@ -23,8 +23,6 @@ struct video_params
     std::string name;
     std::string format;
     size_t duration;
-    size_t width;
-    size_t height;
     double fps;
 };
 

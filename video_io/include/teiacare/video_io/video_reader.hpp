@@ -38,7 +38,7 @@ public:
     explicit video_reader() noexcept;
     ~video_reader() noexcept override;
 
-    bool open(const char* video_path) override;
+    bool open(const std::string& video_path) override;
     bool is_opened() const override;
     bool read(uint8_t** data, double* pts = nullptr) override;
     void release() override;

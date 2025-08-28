@@ -25,7 +25,7 @@ extern "C"
 #include <libavutil/error.h>
 }
 
-#define VIDEO_CAPTURE_LOG_ENABLED
+// #define VIDEO_CAPTURE_LOG_ENABLED
 
 #if defined(VIDEO_CAPTURE_LOG_ENABLED)
 #include <iostream>

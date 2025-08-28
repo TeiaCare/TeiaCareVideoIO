@@ -52,80 +52,90 @@ protected:
     {
     }
 
+    uint8_t* allocate_frame_buffer()
+    {
+        auto frame_size = v->get_frame_size();
+        EXPECT_TRUE(frame_size.has_value());
+
+        const auto [width, height] = frame_size.value();
+        EXPECT_GT(width, 0);
+        EXPECT_GT(height, 0);
+
+        frame.resize(width * height * 3);
+        return frame.data();
+    }
+
+    void read_half_video(const std::unique_ptr<vio::video_reader>& v, const std::filesystem::path& video_path, int video_duration_in_seconds, double fps)
+    {
+        ASSERT_TRUE(v->open(video_path.string().c_str()));
+        ASSERT_TRUE(v->is_opened());
+
+        uint8_t* data_buffer = allocate_frame_buffer();
+
+        const int total_video_frames_divided_by_two = static_cast<int>(fps * video_duration_in_seconds * 0.5);
+
+        for (int current_frame_index = 0; current_frame_index != total_video_frames_divided_by_two; ++current_frame_index)
+        {
+            ASSERT_TRUE(v->read(&data_buffer));
+        }
+    }
+
+    void read_full_video(const std::unique_ptr<vio::video_reader>& v, const std::filesystem::path& video_path, size_t video_duration_in_seconds, double fps)
+    {
+        ASSERT_TRUE(v->open(video_path.string().c_str()));
+        ASSERT_TRUE(v->is_opened());
+
+        auto frame_size = v->get_frame_size();
+        EXPECT_TRUE(frame_size.has_value());
+
+        const auto [width, height] = frame_size.value();
+        EXPECT_GT(width, 0);
+        EXPECT_GT(height, 0);
+
+        std::vector<uint8_t> frame;
+        frame.resize(width * height * 3);
+        uint8_t* data_buffer = frame.data();
+
+        double pts = 0.0;
+        double current_pts = 0.0;
+
+        // The expcted number of video frames is equal to video_duration * FPS
+        const int total_frames = static_cast<int>(fps * video_duration_in_seconds);
+
+        // The expected pts increment (for each consecutive frame) is equal to 1 / FPS
+        const double pts_increment = 1.0 / fps;
+
+        // Set the absolute error equal to half of the pts increment due to ossible rounding errors on floating points operations.
+        const double absolute_pts_error = pts_increment * 0.5;
+
+        for (int current_frame_index = 0; current_frame_index != total_frames; ++current_frame_index)
+        {
+            ASSERT_TRUE(v->read(&data_buffer, &pts));
+            ASSERT_NE(data_buffer, nullptr);
+            ASSERT_EQ(frame.size(), width * height * 3);
+            ASSERT_NEAR(pts, current_pts, absolute_pts_error);
+            current_pts += pts_increment;
+        }
+
+        // Verify that no more frames can be read once the video is finished
+        for (int current_frame_index = 0; current_frame_index != total_frames; ++current_frame_index)
+        {
+            ASSERT_FALSE(v->read(&data_buffer, &pts));
+            ASSERT_NE(data_buffer, nullptr);
+            ASSERT_EQ(pts, -1.0);
+        }
+
+        v->release();
+        ASSERT_FALSE(v->is_opened());
+    }
+
     std::unique_ptr<vio::video_reader> v;
     const std::filesystem::path default_input_directory;
     const std::string default_video_extension;
     const std::string default_video_name;
     const std::filesystem::path default_video_path;
-
-    static const int width = 640;
-    static const int height = 480;
-    static const int frame_size = width * height * 3;
-    std::array<uint8_t, frame_size> frame_data = {};
+    std::vector<uint8_t> frame;
 };
-
-void read_half_video(const std::unique_ptr<vio::video_reader>& v, const std::filesystem::path& video_path, int video_duration_in_seconds, double fps, int width, int height)
-{
-    ASSERT_TRUE(v->open(video_path.string().c_str()));
-    ASSERT_TRUE(v->is_opened());
-
-    // Initialize the dummy frame
-    const size_t frame_size = width * height * 3;
-    std::vector<uint8_t> frame_data = {};
-    frame_data.resize(frame_size);
-    uint8_t* data_buffer = frame_data.data();
-
-    const int total_video_frames_divided_by_two = static_cast<int>(fps * video_duration_in_seconds * 0.5);
-
-    for (int current_frame_index = 0; current_frame_index != total_video_frames_divided_by_two; ++current_frame_index)
-    {
-        ASSERT_TRUE(v->read(&data_buffer));
-    }
-}
-
-void read_full_video(const std::unique_ptr<vio::video_reader>& v, const std::filesystem::path& video_path, size_t video_duration_in_seconds, double fps, size_t width, size_t height)
-{
-    ASSERT_TRUE(v->open(video_path.string().c_str()));
-    ASSERT_TRUE(v->is_opened());
-
-    // Initialize the dummy frame
-    const size_t frame_size = width * height * 3;
-    std::vector<uint8_t> frame_data = {};
-    frame_data.resize(frame_size);
-    uint8_t* data_buffer = frame_data.data();
-
-    double pts = 0.0;
-    double current_pts = 0.0;
-
-    // The expcted number of video frames is equal to video_duration * FPS
-    const int total_frames = static_cast<int>(fps * video_duration_in_seconds);
-
-    // The expected pts increment (for each consecutive frame) is equal to 1 / FPS
-    const double pts_increment = 1.0 / fps;
-
-    // Set the absolute error equal to half of the pts increment due to ossible rounding errors on floating points operations.
-    const double absolute_pts_error = pts_increment * 0.5;
-
-    for (int current_frame_index = 0; current_frame_index != total_frames; ++current_frame_index)
-    {
-        ASSERT_TRUE(v->read(&data_buffer, &pts));
-        ASSERT_NE(data_buffer, nullptr);
-        ASSERT_EQ(frame_data.size(), frame_size);
-        ASSERT_NEAR(pts, current_pts, absolute_pts_error);
-        current_pts += pts_increment;
-    }
-
-    // Verify that no more frames can be read once the video is finished
-    for (int current_frame_index = 0; current_frame_index != total_frames; ++current_frame_index)
-    {
-        ASSERT_FALSE(v->read(&data_buffer, &pts));
-        ASSERT_EQ(data_buffer, nullptr);
-        ASSERT_EQ(pts, -1.0);
-    }
-
-    v->release();
-    ASSERT_FALSE(v->is_opened());
-}
 
 class parametrized_video_reader_test : public video_reader_test, public testing::WithParamInterface<utils::video_params>
 {

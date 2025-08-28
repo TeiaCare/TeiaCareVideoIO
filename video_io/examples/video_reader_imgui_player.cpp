@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     tc::vio::video_reader v;
 
     // std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / "video_10sec_30fps_HD.mkv";
-    std::filesystem::path default_video_path = "rtsp://videoproxy.lab.teiacare.com:30554/main/23";
+    std::filesystem::path default_video_path = "/home/stefanolusardi/TeiaCare/TeiaCareVideoIO/data/video_10sec_4fps_4K.mp4"; //"rtsp://videoproxy.lab.teiacare.com:30554/main/23";
     auto video_path = default_video_path.string();
     if (argc > 1)
         video_path = argv[1];
@@ -104,7 +104,8 @@ int main(int argc, char** argv)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glClearColor(0.f, 0.f, 0.f, 0.f);
 
-    uint8_t* frame_data = {};
+    std::vector<uint8_t> frame(frame_width * frame_height * 3);
+    uint8_t* frame_data = frame.data();
 
     while (!glfwWindowShouldClose(window))
     {

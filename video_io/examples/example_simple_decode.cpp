@@ -26,11 +26,12 @@
 #include "utils/video_data_path.hpp"
 #include <filesystem>
 #include <iostream>
+#include <vector>
 
 int main(int argc, char** argv)
 {
     // Create video_reader object
-    tc::vio::video_reader v;
+    auto v = std::make_unique<tc::vio::video_reader>();
 
     // Locate video file to be opened
     std::filesystem::path default_video_path = std::filesystem::path(tc::vio::examples::utils::video_data_path) / "video_10sec_2fps_HD.mp4";
@@ -39,25 +40,30 @@ int main(int argc, char** argv)
         video_path = argv[1];
 
     // Open video (local file or RTSP stream)
-    if (!v.open(video_path.c_str()))
+    if (!v->open(video_path.c_str()))
     {
         std::cout << "Unable to open input video: " << video_path << std::endl;
         return EXIT_FAILURE;
     }
 
     // Read video metadata (fps, frame size, ...)
-    const auto fps = v.get_fps();
+    const auto fps = v->get_fps();
     std::cout << "FPS: " << fps.value() << "\n";
 
-    const auto frame_size = v.get_frame_size();
+    const auto frame_size = v->get_frame_size();
     const auto [width, height] = frame_size.value();
     std::cout << "Frame Size: [" << width << ", " << height << "]\n";
 
     // Read video frame by frame
     std::cout << "Start decoding frames" << std::endl;
     size_t num_decoded_frames = 0;
-    uint8_t* frame_data = {};
-    while (v.read(&frame_data))
+
+    // Allocate buffer for decoded frame data
+
+    std::vector<uint8_t> data_buffer(width * height * 3);
+    uint8_t* frame_data = data_buffer.data();
+
+    while (v->read(&frame_data))
     {
         ++num_decoded_frames;
         std::cout << "Frame: " << num_decoded_frames << std::endl;
@@ -68,7 +74,7 @@ int main(int argc, char** argv)
     std::cout << "Decoded Frames: " << num_decoded_frames << std::endl;
 
     // Release and cleanup video_reader
-    v.release();
+    v->release();
 
     return EXIT_SUCCESS;
 }

@@ -89,7 +89,7 @@ void video_reader::release()
     _stream_index = -1;
 }
 
-bool video_reader::open(const char* video_path)
+bool video_reader::open(const std::string& video_path)
 {
     release();
 
@@ -112,7 +112,7 @@ bool video_reader::open(const char* video_path)
     av_dict_set(&_options, "rtsp_flags", "prefer_tcp", 0);
     av_dict_set(&_options, "stimeout", "5000000", 0); // 5 second timeout
 
-    if (auto r = avformat_open_input(&_format_ctx, video_path, nullptr, &_options); r < 0)
+    if (auto r = avformat_open_input(&_format_ctx, video_path.c_str(), nullptr, &_options); r < 0)
     {
         log_error("avformat_open_input", vio::logger::get().err2str(r));
         release();
@@ -355,9 +355,17 @@ bool video_reader::convert(uint8_t** data, double* pts)
         }
     }
 
-    sws_scale(_sws_ctx, _src_frame->data, _src_frame->linesize, 0, _codec_ctx->height, _dst_frame->data, _dst_frame->linesize);
-
-    *data = _dst_frame->data[0];
+    // Scale directly into user's buffer if provided, otherwise use internal buffer
+    if (data && *data)
+    {
+        uint8_t* dst_data[8] = {*data, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+        int dst_linesize[8] = {_codec_ctx->width * 3, 0, 0, 0, 0, 0, 0, 0}; // RGB24 = 3 bytes per pixel
+        sws_scale(_sws_ctx, _src_frame->data, _src_frame->linesize, 0, _codec_ctx->height, dst_data, dst_linesize);
+    }
+    else
+    {
+        sws_scale(_sws_ctx, _src_frame->data, _src_frame->linesize, 0, _codec_ctx->height, _dst_frame->data, _dst_frame->linesize);
+    }
 
     if (pts)
     {
@@ -368,12 +376,10 @@ bool video_reader::convert(uint8_t** data, double* pts)
     return true;
 }
 
-void video_reader::reset_data(uint8_t** data, double* pts) const
+void video_reader::reset_data(uint8_t**, double* pts) const
 {
-    if (data)
-    {
-        *data = nullptr;
-    }
+    // Don't modify the user's data pointer - just reset pts
+    // Setting *data = nullptr could cause issues if the caller expects the original pointer
 
     if (pts)
     {

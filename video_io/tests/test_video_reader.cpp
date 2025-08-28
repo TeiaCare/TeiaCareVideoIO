@@ -15,7 +15,9 @@
 #include "test_video_reader.hpp"
 
 #include <fstream>
+#include <memory>
 #include <thread>
+#include <vector>
 
 namespace tc::vio::tests
 {
@@ -107,38 +109,36 @@ TEST_F(video_reader_test, get_fps_with_open)
 TEST_F(video_reader_test, read_with_pts)
 {
     ASSERT_TRUE(v->open(default_video_path.string().c_str()));
-    uint8_t* data_buffer = frame_data.data();
+
+    uint8_t* frame_buffer = allocate_frame_buffer();
     double pts = 0.0;
-    ASSERT_TRUE(v->read(&data_buffer, &pts));
-    ASSERT_NE(data_buffer, nullptr);
+
+    ASSERT_TRUE(v->read(&frame_buffer, &pts));
+    ASSERT_NE(frame_buffer, nullptr);
     ASSERT_GE(pts, 0.0);
 }
 
 TEST_F(video_reader_test, read_without_pts)
 {
     ASSERT_TRUE(v->open(default_video_path.string().c_str()));
-    uint8_t* data_buffer = frame_data.data();
-    ASSERT_TRUE(v->read(&data_buffer, nullptr));
-    ASSERT_NE(data_buffer, nullptr);
+
+    uint8_t* frame_buffer = allocate_frame_buffer();
+
+    ASSERT_TRUE(v->read(&frame_buffer, nullptr));
+    ASSERT_NE(frame_buffer, nullptr);
 }
 
 TEST_F(video_reader_test, read_multiple_frames_check_pts_progression)
 {
     ASSERT_TRUE(v->open(default_video_path.string().c_str()));
-    uint8_t* data_buffer = frame_data.data();
+
+    uint8_t* frame_buffer = allocate_frame_buffer();
     double pts1 = 0.0, pts2 = 0.0;
 
-    ASSERT_TRUE(v->read(&data_buffer, &pts1));
-    ASSERT_TRUE(v->read(&data_buffer, &pts2));
+    ASSERT_TRUE(v->read(&frame_buffer, &pts1));
+    ASSERT_TRUE(v->read(&frame_buffer, &pts2));
     ASSERT_GT(pts2, pts1);
 }
-
-// Edge cases and error conditions
-// TEST_F(video_reader_test, open_null_path)
-// {
-//     ASSERT_FALSE(v->open(nullptr));
-//     ASSERT_FALSE(v->is_opened());
-// }
 
 TEST_F(video_reader_test, open_empty_path)
 {
@@ -146,22 +146,38 @@ TEST_F(video_reader_test, open_empty_path)
     ASSERT_FALSE(v->is_opened());
 }
 
-// TEST_F(video_reader_test, read_null_data_pointer)
-// {
-//     ASSERT_TRUE(v->open(default_video_path.string().c_str()));
-//     ASSERT_FALSE(v->read(nullptr));
-// }
+TEST_F(video_reader_test, read_null_data_pointer)
+{
+    ASSERT_TRUE(v->open(default_video_path.string().c_str()));
+    ASSERT_TRUE(v->read(nullptr));
+}
+
+TEST_F(video_reader_test, read_empty_data_pointer)
+{
+    ASSERT_TRUE(v->open(default_video_path.string().c_str()));
+    uint8_t* data_buffer = nullptr;
+    ASSERT_TRUE(v->read(&data_buffer));
+}
+
+TEST_F(video_reader_test, read_after_release)
+{
+    ASSERT_TRUE(v->open(default_video_path.string().c_str()));
+    uint8_t* frame_buffer = allocate_frame_buffer();
+
+    v->release();
+    ASSERT_FALSE(v->read(&frame_buffer));
+}
 
 TEST_F(video_reader_test, read_until_eof)
 {
     ASSERT_TRUE(v->open(default_video_path.string().c_str()));
-    uint8_t* data_buffer = frame_data.data();
+    uint8_t* frame_buffer = allocate_frame_buffer();
 
     int frame_count = 0;
-    while (v->read(&data_buffer))
+    while (v->read(&frame_buffer))
     {
         frame_count++;
-        ASSERT_NE(data_buffer, nullptr);
+        ASSERT_NE(frame_buffer, nullptr);
         if (frame_count > 1000) // Prevent infinite loop
             break;
     }
@@ -180,17 +196,17 @@ TEST_F(video_reader_test, multiple_releases)
 TEST_F(video_reader_test, open_after_eof)
 {
     ASSERT_TRUE(v->open(default_video_path.string().c_str()));
-    uint8_t* data_buffer = frame_data.data();
+    uint8_t* frame_buffer = allocate_frame_buffer();
 
     // Read until EOF
-    while (v->read(&data_buffer))
+    while (v->read(&frame_buffer))
     {
     }
 
     // Try to open again
     ASSERT_TRUE(v->open(default_video_path.string().c_str()));
     ASSERT_TRUE(v->is_opened());
-    ASSERT_TRUE(v->read(&data_buffer));
+    ASSERT_TRUE(v->read(&frame_buffer));
 }
 
 // Corrupted file tests
@@ -216,8 +232,8 @@ TEST_F(video_reader_test, is_opened_consistency)
     ASSERT_TRUE(v->open(default_video_path.string().c_str()));
     ASSERT_TRUE(v->is_opened());
 
-    uint8_t* data_buffer = frame_data.data();
-    ASSERT_TRUE(v->read(&data_buffer));
+    uint8_t* frame_buffer = allocate_frame_buffer();
+    ASSERT_TRUE(v->read(&frame_buffer));
     ASSERT_TRUE(v->is_opened());
 
     v->release();
@@ -239,11 +255,11 @@ TEST_F(video_reader_test, destructor_cleanup)
 TEST_F(video_reader_test, flush_decoder)
 {
     ASSERT_TRUE(v->open(default_video_path.string().c_str()));
-    uint8_t* data_buffer = frame_data.data();
+    uint8_t* frame_buffer = allocate_frame_buffer();
 
     // Read a few frames
-    ASSERT_TRUE(v->read(&data_buffer));
-    ASSERT_TRUE(v->read(&data_buffer));
+    ASSERT_TRUE(v->read(&frame_buffer));
+    ASSERT_TRUE(v->read(&frame_buffer));
 
     // Flush should work (this tests the private flush method indirectly)
     v->release(); // This calls flush internally
@@ -259,8 +275,8 @@ TEST_F(video_reader_test, metadata_consistency_across_operations)
     auto initial_size = v->get_frame_size();
     auto initial_duration = v->get_duration();
 
-    uint8_t* data_buffer = frame_data.data();
-    v->read(&data_buffer);
+    uint8_t* frame_buffer = allocate_frame_buffer();
+    v->read(&frame_buffer);
 
     // Metadata should remain consistent after reading
     ASSERT_EQ(v->get_fps().value(), initial_fps.value());
@@ -282,8 +298,8 @@ TEST_F(video_reader_test, open_read_one_frame_release)
     ASSERT_TRUE(v->open(default_video_path.string().c_str()));
     ASSERT_TRUE(v->is_opened());
 
-    uint8_t* data_buffer = frame_data.data();
-    ASSERT_TRUE(v->read(&data_buffer));
+    uint8_t* frame_buffer = allocate_frame_buffer();
+    ASSERT_TRUE(v->read(&frame_buffer));
     ASSERT_TRUE(v->is_opened());
 
     v->release();
@@ -294,8 +310,10 @@ TEST_F(video_reader_test, read_without_open)
 {
     ASSERT_FALSE(v->is_opened());
 
-    uint8_t* data_buffer = frame_data.data();
-    ASSERT_FALSE(v->read(&data_buffer));
+    // Do not call allocate_frame_buffer() here, as it requires video_reader::open() to be called in advance
+    // uint8_t* frame_buffer = allocate_frame_buffer();
+    uint8_t* frame_buffer = {};
+    ASSERT_FALSE(v->read(&frame_buffer));
 
     ASSERT_FALSE(v->is_opened());
     v->release();
@@ -335,36 +353,30 @@ TEST_F(video_reader_test, open_different_paths_without_read)
 TEST_F(video_reader_test, open_another_path_after_read_half_video)
 {
     constexpr const int video_duration_in_seconds = 10;
-    constexpr const int video_width = 1280;
-    constexpr const int video_height = 720;
     constexpr const double fps = 4.0;
 
-    read_half_video(v, default_input_directory / "video_10sec_4fps_HD.mp4", video_duration_in_seconds, fps, video_width, video_height);
-    read_half_video(v, default_input_directory / "video_10sec_4fps_HD.mkv", video_duration_in_seconds, fps, video_width, video_height);
+    read_half_video(v, default_input_directory / "video_10sec_4fps_HD.mp4", video_duration_in_seconds, fps);
+    read_half_video(v, default_input_directory / "video_10sec_4fps_HD.mkv", video_duration_in_seconds, fps);
 }
 
 TEST_F(video_reader_test, open_different_paths_read_all_files_consecutively)
 {
     constexpr const int video_duration_in_seconds = 10;
-    constexpr const int video_width = 1280;
-    constexpr const int video_height = 720;
     constexpr const double fps = 4.0;
 
-    read_full_video(v, default_input_directory / "video_10sec_4fps_SD.mp4", video_duration_in_seconds, fps, video_width, video_height);
-    read_full_video(v, default_input_directory / "video_10sec_4fps_HD.mkv", video_duration_in_seconds, fps, video_width, video_height);
-    read_full_video(v, default_input_directory / "video_10sec_4fps_FHD.mp4", video_duration_in_seconds, fps, video_width, video_height);
+    read_full_video(v, default_input_directory / "video_10sec_4fps_SD.mp4", video_duration_in_seconds, fps);
+    read_full_video(v, default_input_directory / "video_10sec_4fps_HD.mkv", video_duration_in_seconds, fps);
+    read_full_video(v, default_input_directory / "video_10sec_4fps_FHD.mp4", video_duration_in_seconds, fps);
 }
 
 TEST_F(video_reader_test, open_different_paths_read_all_files_in_parallel)
 {
     constexpr const int video_duration_in_seconds = 10;
-    constexpr const int video_width = 1280;
-    constexpr const int video_height = 720;
     constexpr const double video_fps = 4.0;
 
-    auto reader = [](const std::filesystem::path& video_path) {
+    auto reader = [this](const std::filesystem::path& video_path) {
         auto v = std::make_unique<vio::video_reader>();
-        read_full_video(v, video_path, video_duration_in_seconds, video_fps, video_width, video_height);
+        read_full_video(v, video_path, video_duration_in_seconds, video_fps);
     };
 
     std::vector<std::filesystem::path> paths = {
@@ -387,16 +399,16 @@ TEST_F(video_reader_test, open_different_paths_read_all_files_in_parallel)
 INSTANTIATE_TEST_SUITE_P(video_reader_MP4,
                          parametrized_video_reader_test,
                          ::testing::Values(
-                             utils::video_params({.name = "video_2sec_2fps_HD", .format = "mp4", .duration = 2, .width = 640, .height = 480, .fps = 2}),
-                             utils::video_params({.name = "video_10sec_1fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 1}),
-                             utils::video_params({.name = "video_10sec_2fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 2}),
-                             utils::video_params({.name = "video_10sec_4fps_4K", .format = "mp4", .duration = 10, .width = 3840, .height = 2160, .fps = 4}),
-                             utils::video_params({.name = "video_10sec_4fps_FHD", .format = "mp4", .duration = 10, .width = 1920, .height = 1080, .fps = 4}),
-                             utils::video_params({.name = "video_10sec_4fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 4}),
-                             utils::video_params({.name = "video_10sec_4fps_SD", .format = "mp4", .duration = 10, .width = 640, .height = 480, .fps = 4}),
-                             utils::video_params({.name = "video_10sec_8fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 8}),
-                             utils::video_params({.name = "video_10sec_16fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 16}),
-                             utils::video_params({.name = "video_10sec_30fps_HD", .format = "mp4", .duration = 10, .width = 1280, .height = 720, .fps = 30})
+                             utils::video_params({.name = "video_2sec_2fps_HD", .format = "mp4", .duration = 2, .fps = 2}),
+                             utils::video_params({.name = "video_10sec_1fps_HD", .format = "mp4", .duration = 10, .fps = 1}),
+                             utils::video_params({.name = "video_10sec_2fps_HD", .format = "mp4", .duration = 10, .fps = 2}),
+                             utils::video_params({.name = "video_10sec_4fps_4K", .format = "mp4", .duration = 10, .fps = 4}),
+                             utils::video_params({.name = "video_10sec_4fps_FHD", .format = "mp4", .duration = 10, .fps = 4}),
+                             utils::video_params({.name = "video_10sec_4fps_HD", .format = "mp4", .duration = 10, .fps = 4}),
+                             utils::video_params({.name = "video_10sec_4fps_SD", .format = "mp4", .duration = 10, .fps = 4}),
+                             utils::video_params({.name = "video_10sec_8fps_HD", .format = "mp4", .duration = 10, .fps = 8}),
+                             utils::video_params({.name = "video_10sec_16fps_HD", .format = "mp4", .duration = 10, .fps = 16}),
+                             utils::video_params({.name = "video_10sec_30fps_HD", .format = "mp4", .duration = 10, .fps = 30})
                              // utils::video_params({.name="video_120sec_30fps_SD", .format="mp4", .duration=120, .width=640, .height=480, .fps=30})
                              ),
                          [](auto info) { return info.param.name; });
@@ -404,16 +416,16 @@ INSTANTIATE_TEST_SUITE_P(video_reader_MP4,
 INSTANTIATE_TEST_SUITE_P(video_reader_MKV,
                          parametrized_video_reader_test,
                          ::testing::Values(
-                             utils::video_params({.name = "video_2sec_2fps_HD", .format = "mkv", .duration = 2, .width = 640, .height = 480, .fps = 2}),
-                             utils::video_params({.name = "video_10sec_1fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 1}),
-                             utils::video_params({.name = "video_10sec_2fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 2}),
-                             utils::video_params({.name = "video_10sec_4fps_4K", .format = "mkv", .duration = 10, .width = 3840, .height = 2160, .fps = 4}),
-                             utils::video_params({.name = "video_10sec_4fps_FHD", .format = "mkv", .duration = 10, .width = 1920, .height = 1080, .fps = 4}),
-                             utils::video_params({.name = "video_10sec_4fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 4}),
-                             utils::video_params({.name = "video_10sec_4fps_SD", .format = "mkv", .duration = 10, .width = 640, .height = 480, .fps = 4}),
-                             utils::video_params({.name = "video_10sec_8fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 8}),
-                             utils::video_params({.name = "video_10sec_16fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 16}),
-                             utils::video_params({.name = "video_10sec_30fps_HD", .format = "mkv", .duration = 10, .width = 1280, .height = 720, .fps = 30})
+                             utils::video_params({.name = "video_2sec_2fps_HD", .format = "mkv", .duration = 2, .fps = 2}),
+                             utils::video_params({.name = "video_10sec_1fps_HD", .format = "mkv", .duration = 10, .fps = 1}),
+                             utils::video_params({.name = "video_10sec_2fps_HD", .format = "mkv", .duration = 10, .fps = 2}),
+                             utils::video_params({.name = "video_10sec_4fps_4K", .format = "mkv", .duration = 10, .fps = 4}),
+                             utils::video_params({.name = "video_10sec_4fps_FHD", .format = "mkv", .duration = 10, .fps = 4}),
+                             utils::video_params({.name = "video_10sec_4fps_HD", .format = "mkv", .duration = 10, .fps = 4}),
+                             utils::video_params({.name = "video_10sec_4fps_SD", .format = "mkv", .duration = 10, .fps = 4}),
+                             utils::video_params({.name = "video_10sec_8fps_HD", .format = "mkv", .duration = 10, .fps = 8}),
+                             utils::video_params({.name = "video_10sec_16fps_HD", .format = "mkv", .duration = 10, .fps = 16}),
+                             utils::video_params({.name = "video_10sec_30fps_HD", .format = "mkv", .duration = 10, .fps = 30})
                              // utils::video_params({.name="video_120sec_30fps_SD", .format="mkv", .duration=120, .width=640, .height=480, .fps=30})
                              ),
                          [](auto info) { return info.param.name; });
@@ -422,7 +434,7 @@ TEST_P(parametrized_video_reader_test, read)
 {
     const utils::video_params params = GetParam();
     const std::filesystem::path video_path = default_input_directory / (params.name + "." + params.format);
-    read_full_video(v, video_path, params.duration, params.fps, params.width, params.height);
+    read_full_video(v, video_path, params.duration, params.fps);
 }
 
 }
