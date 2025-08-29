@@ -130,6 +130,11 @@ if(TC_ENABLE_EXAMPLES)
     target_link_libraries(example_simple_encode PRIVATE teiacare::video_io)
     install(TARGETS example_simple_encode DESTINATION examples)
 
+    add_executable(example_video_decode_encode examples/example_video_decode_encode.cpp)
+    target_compile_features(example_video_decode_encode PUBLIC cxx_std_20)
+    target_link_libraries(example_video_decode_encode PRIVATE teiacare::video_io)
+    install(TARGETS example_video_decode_encode DESTINATION examples)
+
     # Video Player (OpenGL)
     find_package(glfw3 CONFIG REQUIRED)
     add_executable(video_reader_opengl_player examples/video_reader_opengl_player.cpp)

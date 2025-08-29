@@ -181,14 +181,12 @@ bool video_writer::open(const std::string& video_path, int width, int height, co
         return false;
     }
 
-    if (_codec_ctx->pix_fmt != AV_PIX_FMT_YUV420P)
+    // Always allocate _src_frame for RGB24 input format
+    if (_src_frame = alloc_frame(static_cast<int>(AVPixelFormat::AV_PIX_FMT_RGB24), _codec_ctx->width, _codec_ctx->height); !_src_frame)
     {
-        if (_src_frame = alloc_frame(static_cast<int>(AVPixelFormat::AV_PIX_FMT_YUV420P), _codec_ctx->width, _codec_ctx->height); !_dst_frame)
-        {
-            log_error("alloc_frame");
-            release();
-            return false;
-        }
+        log_error("alloc_frame");
+        release();
+        return false;
     }
 
     if (auto r = avcodec_parameters_from_context(_stream->codecpar, _codec_ctx); r < 0)
@@ -325,39 +323,31 @@ bool video_writer::convert(const uint8_t* data)
         return false;
     }
 
-    if (_codec_ctx->pix_fmt != AV_PIX_FMT_YUV420P)
+    // Input data is expected to be RGB24 format (as from tc::vio::video_reader)
+    // We need to convert RGB24 to the codec's pixel format (typically YUV420P)
+    if (!_sws_ctx)
     {
-        // as we only generate a YUV420P picture, we must convert it to the codec pixel format if needed
+        _sws_ctx = sws_getCachedContext(_sws_ctx,
+                                        _codec_ctx->width, _codec_ctx->height, AVPixelFormat::AV_PIX_FMT_RGB24,
+                                        _codec_ctx->width, _codec_ctx->height, _codec_ctx->pix_fmt,
+                                        SWS_BILINEAR, nullptr, nullptr, nullptr);
+
         if (!_sws_ctx)
         {
-            _sws_ctx = sws_getCachedContext(_sws_ctx,
-                                            _codec_ctx->width, _codec_ctx->height, AVPixelFormat::AV_PIX_FMT_YUV420P,
-                                            _codec_ctx->width, _codec_ctx->height, _codec_ctx->pix_fmt,
-                                            SWS_BILINEAR, nullptr, nullptr, nullptr);
-
-            if (!_sws_ctx)
-            {
-                log_error("Unable to initialize SwsContext");
-                return false;
-            }
-        }
-
-        if (auto r = av_image_fill_arrays(_src_frame->data, _src_frame->linesize, data, _codec_ctx->pix_fmt, _codec_ctx->width, _codec_ctx->height, 1); r < 0)
-        {
-            log_error("av_image_fill_arrays", vio::logger::get().err2str(r));
+            log_error("Unable to initialize SwsContext");
             return false;
         }
-
-        sws_scale(_sws_ctx, _src_frame->data, _src_frame->linesize, 0, _codec_ctx->height, _dst_frame->data, _dst_frame->linesize);
     }
-    else
+
+    // Fill source frame with RGB24 data
+    if (auto r = av_image_fill_arrays(_src_frame->data, _src_frame->linesize, data, AVPixelFormat::AV_PIX_FMT_RGB24, _codec_ctx->width, _codec_ctx->height, 1); r < 0)
     {
-        if (auto r = av_image_fill_arrays(_dst_frame->data, _dst_frame->linesize, data, _codec_ctx->pix_fmt, _codec_ctx->width, _codec_ctx->height, 1); r < 0)
-        {
-            log_error("av_image_fill_arrays", vio::logger::get().err2str(r));
-            return false;
-        }
+        log_error("av_image_fill_arrays", vio::logger::get().err2str(r));
+        return false;
     }
+
+    // Convert RGB24 to codec pixel format (e.g., YUV420P)
+    sws_scale(_sws_ctx, _src_frame->data, _src_frame->linesize, 0, _codec_ctx->height, _dst_frame->data, _dst_frame->linesize);
 
     _dst_frame->pts = _next_pts++; // Timestamp increment must be 1 for fixed-fps content
 
