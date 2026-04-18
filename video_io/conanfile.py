@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from conans import ConanFile
+from conan import ConanFile
 
 class FFMPEG(ConanFile):
     requires = "ffmpeg/6.1.1"
-    generators = "CMakeDeps"
+    generators = "CMakeDeps", "CMakeToolchain"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
