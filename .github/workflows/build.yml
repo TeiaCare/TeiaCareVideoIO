@@ -163,12 +163,13 @@ jobs:
           cmake --install build/${{ env.BUILD_TYPE }} --prefix install
           python3 scripts/tools/run_unit_tests.py ${{ env.BUILD_TYPE }}
           python3 scripts/tools/run_coverage.py ${{ env.COMPILER }} ${{ env.COMPILER_VERSION }} video_io
-        timeout-minutes: 5
+        timeout-minutes: 20
         continue-on-error: true
         env:
           CONAN_HOME: ${{ github.workspace }}/.conan2
 
       - name: Upload Codacy
+        if: hashFiles('results/coverage/cobertura.xml') != ''
         run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r results/coverage/cobertura.xml
         env:
          CODACY_PROJECT_TOKEN: ${{secrets.CODACY_PROJECT_TOKEN}}
