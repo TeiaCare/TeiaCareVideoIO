@@ -1,4 +1,9 @@
 # TeiaCareVideoIO Changelog
 
-## [1.0.0] - 2025-xx-xx
-### Added
+## [0.2.2] - 2026-04-21
+### Changed
+- Migrate build toolchain to Conan 2 and venvpp2
+- Point scripts submodule to TeiaCare/venvpp2
+- CI: increase coverage job timeout (5m → 20m) and gate Codacy on file presence
+- CI: disable tests in Build step and examples in Unit Tests step
+- CI: let conancenter resolve recipes before teiacare remote
