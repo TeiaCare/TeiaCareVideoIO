@@ -19,25 +19,18 @@ git clone https://github.com/TeiaCare/TeiaCareVideoIO.git --recursive
 ```
 
 ### Create Development Environment
-In order to setup a development environment it is sufficient to run the script *scripts/env/setup.<bat|sh>* depending on your operating system.
+The build toolchain uses Conan 2 and [venvpp2](https://github.com/FrancescoOlivaTC/venvpp2) (vendored as the `scripts/` submodule).
 
 ```bash
 # Linux/MacOS
-scripts/env/setup.sh
-
-# Windows
-scripts\env\setup.bat
-```
-
-### Start Development Environment
-In order to start the development environment it is sufficient to activate the Python Virtual Environment just created the step above.
-
-```bash
-# Linux/MacOS
+python3 -m venv .venv
 source .venv/bin/activate
+pip3 install -r scripts/scripts/requirements.txt
 
 # Windows
+python -m venv .venv
 .venv\Scripts\activate.bat
+pip install -r scripts/scripts/requirements.txt
 ```
 
 ### Setup Build Environment (Windows Only)
@@ -58,18 +51,31 @@ Examples:
 ```
 
 ### Dependencies Setup
-This script must be executed in order to setup the 3rd party dependencies using conan packages.
-```bash
-conan remote add teiacare https://artifactory.app.teiacare.com/artifactory/api/conan/teiacare --insert 0 --force
-conan user <USERNAME> -p <PASSWORD> -r teiacare
+Point Conan 2 at the TeiaCare Artifactory and install dependencies into a local cache under `.conan2/`.
 
-python scripts/conan/setup.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION>
+```bash
+export CONAN_HOME=$PWD/.conan2
+conan remote add teiacare https://artifactory.app.teiacare.com/artifactory/api/conan/teiacare --index 0 --force
+conan remote login teiacare <USERNAME> -p <PASSWORD>
+
+# Library deps (ffmpeg)
+conan install video_io/conanfile.py --output-folder build/modules -pr:a=scripts/profiles/linux-gcc -s build_type=Debug --build missing
+
+# Test deps (gtest, spdlog)
+conan install video_io/tests --output-folder build/modules -pr:a=scripts/profiles/linux-gcc -s build_type=Debug --build missing
+
+# Example deps (imgui, glfw) — copies ImGui bindings into build/imgui_bindings
+conan install video_io/examples --output-folder build/modules -pr:a=scripts/profiles/linux-gcc -s build_type=Debug --build missing
 ```
 
 ### Configure, Build and Install
-This script configures, builds and installs the library.
 ```bash
-python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION>
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_TOOLCHAIN_FILE=build/modules/conan_toolchain.cmake \
+  -DTC_ENABLE_UNIT_TESTS=True -DTC_ENABLE_EXAMPLES=True \
+  -B build/Debug -S . --fresh
+cmake --build build/Debug
+cmake --install build/Debug --prefix install
 ```
 
 ## Install FFmpeg for Examples and Unit Tests
@@ -100,8 +106,7 @@ python scripts/tests/generate_test_data.py
 ## Examples
 
 ```bash
-# Build all the examples
-python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION> --examples --warnings
+# Build with examples enabled (see "Configure, Build and Install" above with -DTC_ENABLE_EXAMPLES=True)
 
 # Run all the examples
 python scripts/tools/run_examples.py install/examples
@@ -112,14 +117,11 @@ Examples are installed in $PWD/install/examples.
 ## Unit Tests and Code Coverage
 
 ```bash
-# Build Unit Tests with Code Coverage enabled (if supported)
-python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION> --coverage --warnings
-
 # Run Unit Tests
 python scripts/tools/run_unit_tests.py <Debug|Release|RelWithDebInfo>
 
-# Run Code Covergae
-python scripts/tools/run_coverage.py <COMPILER_NAME> <COMPILER_VERSION>
+# Run Code Coverage (enable with -DTC_ENABLE_UNIT_TESTS_COVERAGE=True at configure time)
+python scripts/tools/run_coverage.py <COMPILER_NAME> <COMPILER_VERSION> video_io
 ```
 Note that code coverage is not available on Windows.
 
@@ -131,11 +133,9 @@ Coverage results are available in $PWD/results/coverage.
 
 ### Address Sanitizer
 
-```bash
-# Build Unit Tests with Address Sanitizer enabled (if supported)
-python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION> --address_sanitizer --unit_tests
+Configure with `-DTC_ENABLE_SANITIZER_ADDRESS=True` (Linux only), then:
 
-# Run Unit Tests with Address Sanitizer
+```bash
 python scripts/tools/run_sanitizer.py --address_sanitizer install/unit_tests/teiacare_video_io_unit_tests
 ```
 Note that Address Sanitizer is supported only on Linux.
@@ -143,11 +143,9 @@ Note that Address Sanitizer is supported only on Linux.
 
 ### Thread Sanitizer
 
-```bash
-# Build Unit Tests with Thread Sanitizer enabled (if supported)
-python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION> --thread_sanitizer --unit_tests
+Configure with `-DTC_ENABLE_SANITIZER_THREAD=True` (Linux only), then:
 
-# Run Unit Tests with Thread Sanitizer
+```bash
 python scripts/tools/run_sanitizer.py --thread_sanitizer install/unit_tests/teiacare_video_io_unit_tests
 ```
 Note that Thread Sanitizer is supported only on Linux.
@@ -155,11 +153,9 @@ Note that Thread Sanitizer is supported only on Linux.
 
 ## Benchmarks
 
-```bash
-# Build Benkmarks
-python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION> --benchmarks --warnings
+Configure with `-DTC_ENABLE_BENCHMARKS=True`, then:
 
-# Run Benchmarks
+```bash
 python scripts/tools/run_benchmarks.py <COMPILER_NAME> <COMPILER_VERSION>
 ```
 Benchmarks are installed in $PWD/install/benchmarks.
@@ -234,14 +230,8 @@ Notes:
    The directory test_package contains a test project that is built to validate the proper package creation.
 
 ```bash
-# Create the Conan package locally
-python scripts/conan/create.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION>
-
-# Build and install the test package executable
-python test_package/build.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION>
-
-# Run the test package executable
-$PWD/install/test_package/teiacare_sdk_test_package
+# Create the Conan package locally (runs the test_package automatically)
+conan create . -s build_type=Debug -pr:a=.ci/profiles/linux-gcc-12 --build missing
 ```
 
 
@@ -251,20 +241,20 @@ In order to upload a Conan package to TeiaCare Artifactory server it is required
 
 ```bash
 # Add TeiaCare Artifactory remote to local Conan client
-conan remote add teiacare $(artifactory.url)/teiacare
+conan remote add teiacare $(artifactory.url)/teiacare --index 0 --force
 
 # Authenticate with Artifactory credentials
-conan user $(artifactory.username) -p $(artifactory.password) -r teiacare
+conan remote login teiacare $(artifactory.username) -p $(artifactory.password)
 ```
 
 Now it is possible to create and upload a Conan package with the following commands:
 
 ```bash
 # Create the Conan package locally
-python scripts/conan/create.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION>
+conan create . -s build_type=Debug -pr:a=.ci/profiles/linux-gcc-12 --build missing
 
-# Upload the package to Artifactory on the teicare remote
-python scripts/conan/upload.py teiacare teiacare_video_io
+# Upload all cached packages to the teiacare remote
+conan upload "*" --remote teiacare --confirm
 ```
 
 

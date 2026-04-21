@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from conans import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy
 import re
 
 def get_project_version():
@@ -34,7 +35,7 @@ class TeiaCareVideoIO(ConanFile):
     description = "TeiaCareVideoIO is a C++ video encoder and decoder library"
     topics = ("video", "encoding", "decoding")
     exports = "VERSION"
-    exports_sources = "CMakeLists.txt", "video_io/*", "cmake/*"
+    exports_sources = "CMakeLists.txt", "VERSION", "video_io/*", "cmake/*"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -112,9 +113,12 @@ class TeiaCareVideoIO(ConanFile):
             self.options["ffmpeg"].with_xcb=False
             self.options["ffmpeg"].with_xlib=False
 
+    def layout(self):
+        cmake_layout(self)
+
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.variables["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
         tc.variables["TC_ENABLE_UNIT_TESTS"] = False
         tc.variables["TC_ENABLE_UNIT_TESTS_COVERAGE"] = False
         tc.variables["TC_ENABLE_BENCHMARKS"] = False
@@ -134,7 +138,7 @@ class TeiaCareVideoIO(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="VERSION")
+        copy(self, "VERSION", src=self.source_folder, dst=self.package_folder)
         cmake = CMake(self)
         cmake.install()
 
