@@ -35,7 +35,7 @@ class TeiaCareVideoIO(ConanFile):
     description = "TeiaCareVideoIO is a C++ video encoder and decoder library"
     topics = ("video", "encoding", "decoding")
     exports = "VERSION"
-    exports_sources = "CMakeLists.txt", "VERSION", "video_io/*", "cmake/*"
+    exports_sources = "CMakeLists.txt", "VERSION", "cmake/*", "video_io/CMakeLists.txt", "video_io/include/*", "video_io/src/*"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
