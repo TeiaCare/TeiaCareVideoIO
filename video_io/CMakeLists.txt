@@ -6,7 +6,7 @@ find_package(ffmpeg CONFIG REQUIRED)
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/version.cpp.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/version.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
 )
 
 set(TARGET_HEADERS
@@ -20,7 +20,7 @@ set(TARGET_HEADERS
 
 set(TARGET_SOURCES
     src/logger.hpp
-    src/version.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
     src/video_info.cpp
     src/video_reader.cpp
     src/video_writer.cpp
